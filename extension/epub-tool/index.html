@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inkbolt — E-book Converter</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <svg class="logo" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="url(#g)" />
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#241a44" />
+            <stop offset="1" stop-color="#150f27" />
+          </linearGradient>
+        </defs>
+        <path d="M15 5 L9 17 L14 17 L12.5 27 L23 13 L17 13 L19 5 Z" fill="#FFC857" />
+      </svg>
+      <div class="wordmark">
+        <h1>Inkbolt</h1>
+        <span class="tagline">E-book Converter</span>
+      </div>
+    </header>
+
+    <p class="intro">
+      Drop in an <strong>.epub</strong> or <strong>.txt</strong> file. We bold the leading
+      letters of each word — same engine as the Inkbolt browser extension —
+      and hand you back a file in the <strong>same format</strong> you gave
+      us. Your original CSS, fonts, images, and structure are left
+      completely untouched; only the text itself changes (via markup for
+      EPUB, via bold Unicode characters for TXT).
+    </p>
+
+    <section id="dropzone" class="dropzone">
+      <input type="file" id="fileInput" accept=".epub,.txt" hidden />
+      <div class="dropzone-inner">
+        <div class="dropzone-icon">⇪</div>
+        <p><strong>Drag a file here</strong> or click to browse</p>
+        <p class="dropzone-sub">.epub and .txt supported</p>
+      </div>
+    </section>
+
+    <section class="options">
+      <div class="label">
+        <strong>Bold intensity</strong>
+        <span class="sub">How much of each word is bolded</span>
+      </div>
+      <input type="range" id="ratioSlider" min="30" max="70" step="5" value="50" />
+      <div class="ratio-preview" id="ratioPreview"><span class="bold">Read</span>ing</div>
+    </section>
+
+    <section id="progress" class="progress hidden">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <p id="progressLabel">Preparing…</p>
+      <ul id="progressLog"></ul>
+    </section>
+
+    <section id="result" class="result hidden">
+      <p id="resultMsg"></p>
+      <a id="downloadLink" class="download-btn" download>Download converted file</a>
+    </section>
+
+    <section id="errorBox" class="error hidden"></section>
+
+    <footer>
+      <p>
+        MOBI, AZW3, KFX, and PDF aren't supported directly — convert to EPUB
+        first with <a href="https://calibre-ebook.com/" target="_blank" rel="noopener">Calibre</a>
+        (free), then drop the EPUB in here.
+      </p>
+    </footer>
+  </main>
+
+  <script src="vendor/jszip.min.js"></script>
+  <script src="../src/inkbolt-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
