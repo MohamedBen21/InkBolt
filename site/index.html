@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inkbolt — Bold words. Faster reading.</title>
+<meta name="description" content="Inkbolt bolds the leading letters of every word on any page, or inside your EPUB/TXT files, to help you read faster and stay focused. No font changes, ever." />
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="#" class="brand">
+        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="brand-logo">
+          <rect width="32" height="32" rx="8" fill="url(#g)" />
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#241a44" /><stop offset="1" stop-color="#150f27" />
+            </linearGradient>
+          </defs>
+          <path d="M15 5 L9 17 L14 17 L12.5 27 L23 13 L17 13 L19 5 Z" fill="#FFC857" />
+        </svg>
+        Inkbolt
+      </a>
+      <nav>
+        <a href="#how">How it works</a>
+        <a href="#ebooks">E-books</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
+        <h1>
+          <span class="ib">Bo<span class="hl">ld</span> wor<span class="hl">ds</span>.</span>
+          <span class="ib">Fa<span class="hl">ster</span> rea<span class="hl">ding</span>.</span>
+        </h1>
+        <p class="hero-sub">
+          Inkbolt bolds the leading letters of every word on any page —
+          your eyes anchor, your brain fills in the rest. No font changes,
+          no layout shifts, no gimmicks.
+        </p>
+        <div class="hero-ctas">
+          <a href="#how" class="btn btn-primary">See how it works</a>
+          <a href="../extension/epub-tool/index.html" class="btn btn-secondary">Convert an e-book</a>
+        </div>
+        <p class="hero-note">Free · Open source · Works offline · Not yet on the Chrome/Firefox stores</p>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Before</p>
+        <p class="demo-text demo-off">
+          Attention readers, this method is absolutely mind blowing and
+          helps you stay focused while reading online.
+        </p>
+        <p class="demo-label">After</p>
+        <p class="demo-text demo-on">
+          <b>Atten</b>tion <b>read</b>ers, <b>th</b>is <b>meth</b>od <b>i</b>s
+          <b>absol</b>utely <b>mi</b>nd <b>blow</b>ing <b>a</b>nd <b>hel</b>ps
+          <b>y</b>ou <b>st</b>ay <b>foc</b>used <b>wh</b>ile <b>read</b>ing
+          <b>onl</b>ine.
+        </p>
+      </div>
+    </section>
+
+    <section id="how" class="features">
+      <div class="section-head">
+        <h2>How it works</h2>
+        <p>Three things, done well, nothing else.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature">
+          <div class="feature-icon">01</div>
+          <h3>Bolds, never restyles</h3>
+          <p>Only <code>font-weight</code> changes on the first few letters
+          of each word. Your site's font, size, and layout are untouched —
+          always.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">02</div>
+          <h3>Works everywhere, live</h3>
+          <p>Search results, infinite-scroll feeds, single-page apps — a
+          background watcher catches new content as it loads, no refresh
+          needed.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">03</div>
+          <h3>Tune it, or turn it off</h3>
+          <p>A bold-intensity slider, a global switch, and per-site
+          control — on the sites you want, off everywhere else.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="ebooks" class="ebooks">
+      <div class="ebooks-inner">
+        <div class="ebooks-copy">
+          <h2>Your e-books, too</h2>
+          <p>
+            Drop in an <strong>.epub</strong> or <strong>.txt</strong> file
+            and get back a file in the <em>same format</em> — EPUB stays
+            EPUB, TXT stays TXT (using real bold Unicode characters, not
+            markup). Nothing runs on a server; it all happens in your
+            browser.
+          </p>
+          <a href="../extension/epub-tool/index.html" class="btn btn-primary">Open the converter</a>
+        </div>
+        <div class="ebooks-visual">
+          <div class="file-chip">📘 book.epub</div>
+          <div class="arrow">→</div>
+          <div class="file-chip file-chip-accent">📘 book-inkbolt.epub</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="faq">
+      <div class="section-head">
+        <h2>Questions</h2>
+      </div>
+      <div class="faq-list">
+        <details>
+          <summary>Does this change my site's fonts?</summary>
+          <p>No. Inkbolt only adjusts <code>font-weight</code> on part of
+          each word via an inline style — font-family, size, and line
+          height are never touched.</p>
+        </details>
+        <details>
+          <summary>Is this the "Bionic Reading" app?</summary>
+          <p>No — Inkbolt is an independent implementation of a similar
+          fixation-guided reading idea. "Bionic Reading" is a trademark of
+          a different company; Inkbolt is its own product, unaffiliated.</p>
+        </details>
+        <details>
+          <summary>What e-book formats are supported?</summary>
+          <p>EPUB and TXT directly. For MOBI, AZW3, KFX, or PDF, convert to
+          EPUB first with <a href="https://calibre-ebook.com/" target="_blank" rel="noopener">Calibre</a>
+          (free), then use the converter.</p>
+        </details>
+        <details>
+          <summary>Does it send my browsing or my files anywhere?</summary>
+          <p>No network calls are made with your page content or your
+          files — everything runs locally in your browser.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Inkbolt — bold words, faster reading.</p>
+  </footer>
+
+</body>
+</html>
