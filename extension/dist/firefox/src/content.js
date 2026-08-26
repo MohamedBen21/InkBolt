@@ -23,6 +23,45 @@
 
   const WRAP_ATTR = 'data-inkbolt-wrap';
 
+  // Class-name fragments used by common icon fonts. Text inside these
+  // elements isn't prose — it's a ligature name (e.g. "home", "search")
+  // that a special font substitutes for an icon glyph. Splitting that
+  // text across multiple <span> elements (some bold, some not) breaks
+  // the ligature, and the browser falls back to a plain font showing the
+  // literal letters — which looks exactly like "the font changed".
+  const ICON_CLASS_HINTS = [
+    'material-icons', 'material-symbols', 'fa-', ' fa ', 'fas ', 'far ',
+    'fal ', 'fab ', 'font-awesome', 'glyphicon', 'ion-', 'iconify',
+    'bi-', 'octicon', 'remix-icon', 'ri-', 'ti-', 'icomoon', 'feather',
+    'dashicons', 'wp-menu-image', 'themify-icon',
+  ];
+
+  function looksLikeIconElement(el) {
+    if (!el || !el.className || typeof el.className !== 'string') return false;
+    const cls = ` ${el.className.toLowerCase()} `;
+    return ICON_CLASS_HINTS.some((hint) => cls.includes(hint));
+  }
+
+  // Extra safety net for icon fonts that don't use a recognizable class
+  // name: check the actually-computed font-family. Only meaningful on a
+  // live, rendered page (not available for detached/parsed documents).
+  const ICON_FONT_FAMILY_HINTS = [
+    'material icons', 'material symbols', 'font awesome', 'fontawesome',
+    'glyphicons', 'ionicons', 'icomoon', 'dashicons', 'feather',
+  ];
+
+  function looksLikeIconFont(el) {
+    if (!el || typeof window.getComputedStyle !== 'function') return false;
+    try {
+      const family = window.getComputedStyle(el).fontFamily;
+      if (!family) return false;
+      const lower = family.toLowerCase();
+      return ICON_FONT_FAMILY_HINTS.some((hint) => lower.includes(hint));
+    } catch (e) {
+      return false;
+    }
+  }
+
   let settings = {
     globalEnabled: true,
     siteDisabled: [], // hostnames where the extension is off
@@ -47,6 +86,8 @@
     if (SKIP_TAGS.has(el.tagName.toUpperCase())) return true;
     if (el.isContentEditable) return true;
     if (el.closest && el.closest(`[${WRAP_ATTR}]`)) return true;
+    if (looksLikeIconElement(el)) return true;
+    if (looksLikeIconFont(el)) return true;
     return false;
   }
 

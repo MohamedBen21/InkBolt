@@ -74,6 +74,12 @@
           const b = doc.createElement('span');
           b.className = 'inkbolt-b';
           b.style.fontWeight = options.boldWeight;
+          // Belt-and-suspenders: explicitly pin font-family (and style)
+          // to whatever the surrounding text already uses, so nothing
+          // about requesting a bold weight can cause the browser to
+          // substitute a different font family for this span.
+          b.style.fontFamily = 'inherit';
+          b.style.fontStyle = 'inherit';
           b.textContent = head;
           frag.appendChild(b);
         }

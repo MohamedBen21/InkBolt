@@ -18,6 +18,23 @@
     'CODE', 'PRE', 'SVG', 'CANVAS', 'IFRAME', 'OBJECT', 'VIDEO', 'AUDIO',
   ]);
 
+  // Same icon-font class hints as the extension's content script. Some
+  // EPUBs embed icon fonts (Font Awesome, Material Icons, etc.) for
+  // decorative glyphs — splitting that ligature text across bold/non-bold
+  // spans breaks the icon and shows literal fallback-font letters instead.
+  const ICON_CLASS_HINTS = [
+    'material-icons', 'material-symbols', 'fa-', ' fa ', 'fas ', 'far ',
+    'fal ', 'fab ', 'font-awesome', 'glyphicon', 'ion-', 'iconify',
+    'bi-', 'octicon', 'remix-icon', 'ri-', 'ti-', 'icomoon', 'feather',
+    'dashicons', 'themify-icon',
+  ];
+
+  function looksLikeIconElement(el) {
+    if (!el || !el.className || typeof el.className !== 'string') return false;
+    const cls = ` ${el.className.toLowerCase()} `;
+    return ICON_CLASS_HINTS.some((hint) => cls.includes(hint));
+  }
+
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
   const ratioSlider = document.getElementById('ratioSlider');
@@ -72,6 +89,7 @@
     // original source case (usually lowercase), unlike HTML documents
     // where tagName is always uppercase — normalize before comparing.
     if (SKIP_TAGS.has(el.tagName.toUpperCase())) return true;
+    if (looksLikeIconElement(el)) return true;
     return false;
   }
 
