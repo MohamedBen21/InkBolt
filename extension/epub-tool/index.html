@@ -26,20 +26,21 @@
     </header>
 
     <p class="intro">
-      Drop in an <strong>.epub</strong> or <strong>.txt</strong> file. We bold the leading
-      letters of each word — same engine as the Inkbolt browser extension —
-      and hand you back a file in the <strong>same format</strong> you gave
-      us. Your original CSS, fonts, images, and structure are left
-      completely untouched; only the text itself changes (via markup for
-      EPUB, via bold Unicode characters for TXT).
+      Drop in an <strong>.epub</strong>, <strong>.txt</strong>, or
+      <strong>.pdf</strong> file. We bold the leading letters of each word
+      — same engine as the Inkbolt browser extension — and hand you back a
+      file in the <strong>same format</strong> you gave us. EPUB and TXT
+      keep their exact original layout/fonts; PDF is rebuilt with the
+      extracted text in a clean standard layout, since PDFs don't have
+      reflowable text the way EPUB does (see note after converting).
     </p>
 
     <section id="dropzone" class="dropzone">
-      <input type="file" id="fileInput" accept=".epub,.txt" hidden />
+      <input type="file" id="fileInput" accept=".epub,.txt,.pdf" hidden />
       <div class="dropzone-inner">
         <div class="dropzone-icon">⇪</div>
         <p><strong>Drag a file here</strong> or click to browse</p>
-        <p class="dropzone-sub">.epub and .txt supported</p>
+        <p class="dropzone-sub">.epub, .txt, and .pdf supported</p>
       </div>
     </section>
 
@@ -67,7 +68,7 @@
 
     <footer>
       <p>
-        MOBI, AZW3, KFX, and PDF aren't supported directly — convert to EPUB
+        MOBI, AZW3, and KFX aren't supported directly — convert to EPUB
         first with <a href="https://calibre-ebook.com/" target="_blank" rel="noopener">Calibre</a>
         (free), then drop the EPUB in here.
       </p>
@@ -75,6 +76,8 @@
   </main>
 
   <script src="vendor/jszip.min.js"></script>
+  <script src="vendor/pdf.min.js"></script>
+  <script src="vendor/pdf-lib.min.js"></script>
   <script src="../src/inkbolt-core.js"></script>
   <script src="app.js"></script>
 </body>

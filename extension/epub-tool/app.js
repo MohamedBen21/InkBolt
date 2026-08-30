@@ -211,6 +211,129 @@
     };
   }
 
+  // Simple, fixed page layout for the PDF output — this tool doesn't try
+  // to preserve the original PDF's exact layout/fonts/images (PDFs don't
+  // have reflowable text the way EPUB/HTML do, and doing a full visual
+  // reconstruction is a much bigger project). Instead: extract the real
+  // text, bold it correctly, and lay it out cleanly on fresh pages.
+  const PDF_PAGE_W = 612; // US Letter, points
+  const PDF_PAGE_H = 792;
+  const PDF_MARGIN = 54;
+  const PDF_FONT_SIZE = 12;
+  const PDF_LINE_HEIGHT = 16;
+
+  let pdfWorkerConfigured = false;
+  function configurePdfWorkerOnce() {
+    if (pdfWorkerConfigured) return;
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
+    pdfWorkerConfigured = true;
+  }
+
+  async function extractPdfPageTexts(file) {
+    configurePdfWorkerOnce();
+    const buffer = await file.arrayBuffer();
+    const doc = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+    const pageTexts = [];
+    for (let i = 1; i <= doc.numPages; i++) {
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      const text = content.items
+        .map((item) => item.str)
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      pageTexts.push(text);
+    }
+    return pageTexts;
+  }
+
+  async function processPdf(file, ratio) {
+    if (typeof window.pdfjsLib === 'undefined' || typeof window.PDFLib === 'undefined') {
+      throw new Error('PDF libraries failed to load — try reloading the page.');
+    }
+
+    setProgress(10, 'Reading PDF pages…');
+    const pageTexts = await extractPdfPageTexts(file);
+    logLine(`✓ Extracted text from ${pageTexts.length} page(s)`);
+
+    setProgress(35, 'Laying out bolded text…');
+    const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
+    const out = await PDFDocument.create();
+    const fontReg = await out.embedFont(StandardFonts.Helvetica);
+    const fontBold = await out.embedFont(StandardFonts.HelveticaBold);
+
+    let wordCount = 0;
+    let emptyPageCount = 0;
+    const maxWidth = PDF_PAGE_W - PDF_MARGIN * 2;
+    const spaceWidth = fontReg.widthOfTextAtSize(' ', PDF_FONT_SIZE);
+
+    for (let p = 0; p < pageTexts.length; p++) {
+      const pageText = pageTexts[p];
+      let page = out.addPage([PDF_PAGE_W, PDF_PAGE_H]);
+      let x = PDF_MARGIN;
+      let y = PDF_PAGE_H - PDF_MARGIN;
+
+      if (!pageText) {
+        emptyPageCount++;
+        page.drawText('(No extractable text on this page — likely a scan or an image.)', {
+          x: PDF_MARGIN,
+          y,
+          size: PDF_FONT_SIZE,
+          font: fontReg,
+          color: rgb(0.55, 0.55, 0.55),
+        });
+        continue;
+      }
+
+      const tokens = pageText.split(' ').filter(Boolean);
+      for (const token of tokens) {
+        const segs = window.InkboltCore.segmentBionic(token, { ratio });
+        const tokenWidth = segs.reduce(
+          (w, s) => w + (s.bold ? fontBold : fontReg).widthOfTextAtSize(s.text, PDF_FONT_SIZE),
+          0
+        );
+
+        // Wrap to a new line if this token won't fit.
+        if (x + tokenWidth > PDF_MARGIN + maxWidth && x > PDF_MARGIN) {
+          x = PDF_MARGIN;
+          y -= PDF_LINE_HEIGHT;
+        }
+        // Start a new page if we've run out of vertical room.
+        if (y < PDF_MARGIN) {
+          page = out.addPage([PDF_PAGE_W, PDF_PAGE_H]);
+          x = PDF_MARGIN;
+          y = PDF_PAGE_H - PDF_MARGIN;
+        }
+
+        for (const seg of segs) {
+          const font = seg.bold ? fontBold : fontReg;
+          page.drawText(seg.text, { x, y, size: PDF_FONT_SIZE, font, color: rgb(0.1, 0.08, 0.15) });
+          x += font.widthOfTextAtSize(seg.text, PDF_FONT_SIZE);
+        }
+        x += spaceWidth;
+        wordCount++;
+      }
+
+      setProgress(35 + Math.round(((p + 1) / pageTexts.length) * 55), `Page ${p + 1} of ${pageTexts.length}…`);
+    }
+
+    logLine(`✓ ${wordCount} word(s) bolded across ${pageTexts.length} page(s)`);
+    if (emptyPageCount > 0) {
+      logLine(`⚠ ${emptyPageCount} page(s) had no extractable text (likely scanned images)`);
+    }
+
+    setProgress(95, 'Saving PDF…');
+    const pdfBytes = await out.save();
+    setProgress(100, 'Done!');
+
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    return {
+      blob,
+      filename: file.name.replace(/\.pdf$/i, '') + '-inkbolt.pdf',
+      summary: `Stays a .pdf file — ${wordCount} word(s) bolded across ${pageTexts.length} page(s). Note: PDFs don't have reflowable text like EPUB, so this rebuilds the pages with the extracted text in a clean standard layout rather than preserving the original's exact fonts, columns, or images.${emptyPageCount ? ` ${emptyPageCount} page(s) had no extractable text (likely scanned/image-only) and were left blank with a note.` : ''}`,
+    };
+  }
+
   async function handleFile(file) {
     resetUI();
     progressSection.classList.remove('hidden');
@@ -225,9 +348,11 @@
         result = await processEpub(file, ratio);
       } else if (ext === 'txt') {
         result = await processTxt(file, ratio);
+      } else if (ext === 'pdf') {
+        result = await processPdf(file, ratio);
       } else {
         throw new Error(
-          `".${ext}" isn't supported yet. This tool handles EPUB and TXT — for MOBI, AZW3, KFX, or PDF, convert to EPUB first with Calibre (free), then try again.`
+          `".${ext}" isn't supported yet. This tool handles EPUB, TXT, and PDF — for MOBI, AZW3, or KFX, convert to EPUB first with Calibre (free), then try again.`
         );
       }
 
