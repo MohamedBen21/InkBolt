@@ -1,7 +1,7 @@
 /**
  * background.js
- * Minimal by design. Just seeds default settings on install so the
- * content script and popup always have something to read.
+ * Seeds default settings on install, and handles the toggle keyboard
+ * shortcut (see "commands" in the manifest).
  */
 
 chrome.runtime.onInstalled.addListener((details) => {
@@ -12,4 +12,11 @@ chrome.runtime.onInstalled.addListener((details) => {
       ratio: 0.5,
     });
   }
+});
+
+chrome.commands.onCommand.addListener((command) => {
+  if (command !== 'toggle-global') return;
+  chrome.storage.sync.get({ globalEnabled: true }, (stored) => {
+    chrome.storage.sync.set({ globalEnabled: !stored.globalEnabled });
+  });
 });
