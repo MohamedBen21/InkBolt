@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inkbolt — Privacy Policy</title>
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="style.css" />
+<style>
+  .legal { max-width: 720px; margin: 0 auto; padding: 64px 24px 80px; }
+  .legal h1 { font-size: 32px; margin-bottom: 4px; }
+  .legal .updated { color: var(--sub); font-size: 13px; margin-bottom: 40px; }
+  .legal h2 { font-size: 19px; margin-top: 36px; }
+  .legal p, .legal li { color: var(--sub); font-size: 15px; line-height: 1.7; }
+  .legal ul { padding-left: 20px; }
+  .legal a { color: var(--accent); }
+</style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">
+        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="brand-logo">
+          <rect width="32" height="32" rx="8" fill="url(#g)" />
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#241a44" /><stop offset="1" stop-color="#150f27" />
+            </linearGradient>
+          </defs>
+          <path d="M15 5 L9 17 L14 17 L12.5 27 L23 13 L17 13 L19 5 Z" fill="#FFC857" />
+        </svg>
+        Inkbolt
+      </a>
+      <nav><a href="index.html">← Back home</a></nav>
+    </div>
+  </header>
+
+  <main class="legal">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: August 2026</p>
+
+    <p>Inkbolt does not collect, transmit, sell, or share any personal
+    data, browsing history, or page content. Full stop.</p>
+
+    <h2>What Inkbolt does on pages you visit</h2>
+    <p>Inkbolt's content script reads the visible text on the current page
+    <strong>in your browser only</strong>, to apply a local visual
+    formatting change (bolding the leading letters of words). It never
+    sends that text anywhere — there is no server, no analytics endpoint,
+    and no network request made by the extension at all.</p>
+
+    <h2>What Inkbolt stores, and where</h2>
+    <p>Inkbolt saves your settings — whether it's on globally, which sites
+    you've turned it off for, and your bold-intensity preference — using
+    the browser's built-in <code>chrome.storage.sync</code> API. This
+    data:</p>
+    <ul>
+      <li>Stays within your browser (and syncs across your own
+      signed-in browser instances, using your browser vendor's own sync
+      infrastructure)</li>
+      <li>Is never transmitted to Inkbolt or any third party — there is
+      no server to send it to</li>
+      <li>Contains no browsing history, page content, or personally
+      identifying information — only your feature settings</li>
+    </ul>
+
+    <h2>Why Inkbolt requests broad host permissions</h2>
+    <p>Inkbolt requests access to all websites because its entire purpose
+    is to work on any page you choose to enable it on — there's no way to
+    offer that without requesting the permission up front. The extension
+    does not act on this access beyond the local text-formatting described
+    above unless you have it turned on for that site.</p>
+
+    <h2>The e-book converter</h2>
+    <p>The EPUB/TXT converter runs entirely in your browser via
+    JavaScript. Files you convert are never uploaded anywhere — they're
+    read, transformed, and written back to a downloadable file locally.</p>
+
+    <h2>Third-party code</h2>
+    <p>The e-book converter uses JSZip (MIT licensed), bundled locally —
+    it is not loaded from a remote server and does not phone home.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>If this policy changes, the updated version will be posted here,
+    with the "last updated" date revised.</p>
+  </main>
+
+  <footer class="site-footer">
+    <p>Inkbolt — bold words, faster reading.</p>
+  </footer>
+</body>
+</html>

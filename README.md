@@ -24,18 +24,29 @@ inkbolt/
       index.html
       app.js
       style.css
-      vendor/jszip.min.js  <- vendored locally, zero network dependency
+      vendor/
+        jszip.min.js       <- vendored, zero network dependency
+        pdf.min.js         <- pdf.js, for reading PDFs
+        pdf.worker.min.js
+        pdf-lib.min.js     <- for writing PDFs
     manifest.chrome.json
     manifest.firefox.json
     build.sh             <- assembles dist/chrome and dist/firefox
     icons/
   site/                <- marketing/info landing page (static, standalone)
     index.html
+    privacy.html
     style.css
   assets/
     icon.svg             <- master logo source
     social-preview.png   <- GitHub repo social card (1280x640)
+    store/
+      screenshot-1280x800.png
+      promo-small-440x280.png
+      promo-marquee-1400x560.png
   BRAND.md             <- full identity system
+  PRIVACY.md           <- privacy policy (also hosted at site/privacy.html)
+  STORE_LISTING.md     <- Chrome Web Store / AMO listing copy
   README.md            <- this file
 ```
 
@@ -68,10 +79,22 @@ If you edit anything under `extension/src/` or `extension/epub-tool/`, run
 - **One engine, no forks.** `inkbolt-core.js` is framework-agnostic (DOM
   operations only) and is the single source of truth the content script,
   the EPUB path, and the TXT path all call into.
-- **Same format in, same format out.** `.epub` → `.epub`, `.txt` → `.txt`.
-  TXT achieves "bold" via real Unicode Mathematical Bold characters
-  (distinct code points, not markup) since plain text has nothing to hold
-  a `<span>`.
+- **TXT stays TXT via real Unicode bold.** No markup exists in plain
+  text, so bolding uses actual Unicode Mathematical Bold characters
+  (distinct code points, not styling) — the file stays genuinely plain
+  text.
+- **Same format in, same format out — with one honest exception.**
+  `.epub` → `.epub`, `.txt` → `.txt`, both keeping their exact original
+  layout and fonts. `.pdf` → `.pdf` too, but PDFs don't have reflowable
+  text the way EPUB/HTML do — there's no way to "keep the original layout"
+  for extracted PDF text without a much bigger project (real layout
+  reconstruction, font subsetting, etc.). So the PDF path deliberately
+  stays simple: extract the real text with pdf.js, bold it with the exact
+  same engine as everything else, and lay it out cleanly on fresh pages
+  with pdf-lib — accurate text and correct bolding, in a clean standard
+  layout rather than a pixel-match of the original. Scanned/image-only
+  pages are detected and left with a clear note rather than silently
+  producing a blank page.
 - **Zero network dependency where it matters.** JSZip is vendored locally
   inside `extension/epub-tool/vendor/`, both because a packaged extension
   page's CSP won't allow remote scripts by default, and because it means
@@ -82,16 +105,22 @@ If you edit anything under `extension/src/` or `extension/epub-tool/`, run
 - ✅ Core transform engine, page-wide application, live-content watcher
   (MutationObserver), settings (global/per-site/intensity), toggle-off
   revert — all in the extension
-- ✅ E-book converter: EPUB → EPUB, TXT → TXT, bundled into the extension
-  and reachable from the popup
+- ✅ E-book converter: EPUB → EPUB, TXT → TXT, and PDF → PDF (extracted
+  text, cleanly re-laid-out — see design principles above), bundled into
+  the extension and reachable from the popup
 - ✅ Brand identity: name, logo, palette, applied across extension, popup,
   e-book tool, and a marketing site
-- ⏭ Next up: store submission prep (Chrome Web Store $5 fee, Firefox AMO
-  signing — zip `extension/dist/chrome` and `extension/dist/firefox`
-  respectively), a keyboard shortcut to toggle, and hosting `site/` +
-  `extension/epub-tool/` live so the marketing page's CTAs and the
-  "Open the converter" link point to a real URL instead of a relative
-  local path.
+- ✅ Icon-font protection: detects and skips Font Awesome/Material Icons/etc.
+  so ligatures never get broken into garbled fallback-font text
+- ✅ Keyboard shortcut (Ctrl+Shift+B / Cmd+Shift+B) to toggle globally
+- ✅ Store submission prep: privacy policy (`PRIVACY.md` + hosted
+  `site/privacy.html`), listing copy (`STORE_LISTING.md`), and required
+  promotional images (`assets/store/`)
+- ⏭ Next up: actually host `site/` somewhere real (Vercel/GitHub
+  Pages/Netlify), swap the placeholder privacy-policy URL in
+  `STORE_LISTING.md` for the real one, then submit to the Chrome Web
+  Store ($5 one-time fee, zip `extension/dist/chrome`) and Firefox AMO
+  (free, zip `extension/dist/firefox`)
 
 ## Testing notes
 

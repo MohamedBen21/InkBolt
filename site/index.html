@@ -139,7 +139,12 @@
         </details>
         <details>
           <summary>What e-book formats are supported?</summary>
-          <p>EPUB and TXT directly. For MOBI, AZW3, KFX, or PDF, convert to
+          <p>EPUB, TXT, and PDF directly. EPUB and TXT keep their exact
+          original layout and fonts. PDF is rebuilt with the extracted
+          text in a clean standard layout, since PDFs don't have
+          reflowable text the way EPUB does — so the original's exact
+          fonts, columns, and images aren't preserved, only the text
+          itself (now bolded). For MOBI, AZW3, or KFX, convert to
           EPUB first with <a href="https://calibre-ebook.com/" target="_blank" rel="noopener">Calibre</a>
           (free), then use the converter.</p>
         </details>
@@ -153,7 +158,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>Inkbolt — bold words, faster reading.</p>
+    <p>Inkbolt — bold words, faster reading. · <a href="privacy.html">Privacy Policy</a></p>
   </footer>
 
 </body>
