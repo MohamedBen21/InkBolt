@@ -98,6 +98,20 @@ input[type="range"] {
 }
 .epub-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+.shortcut-hint {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: var(--sub);
+  text-align: center;
+}
+kbd {
+  background: var(--line);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-family: inherit;
+}
+
 footer {
   margin-top: 10px;
   font-size: 11px;

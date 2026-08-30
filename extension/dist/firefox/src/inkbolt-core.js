@@ -143,10 +143,48 @@
     return result;
   }
 
+  /**
+   * Same word segmentation as the other transforms, but returns plain
+   * data instead of DOM nodes or a string: an array of
+   * { text, bold } parts in reading order. For consumers that need to
+   * measure and draw text themselves (e.g. laying it out on a PDF page)
+   * rather than build DOM or a plain string.
+   */
+  function segmentBionic(text, opts) {
+    const options = Object.assign({}, DEFAULTS, opts);
+    const segments = [];
+    let lastIndex = 0;
+    let match;
+
+    WORD_RE.lastIndex = 0;
+    while ((match = WORD_RE.exec(text)) !== null) {
+      const word = match[0];
+      const start = match.index;
+
+      if (start > lastIndex) {
+        segments.push({ text: text.slice(lastIndex, start), bold: false });
+      }
+
+      const chars = Array.from(word);
+      const boldLen = computeBoldLength(word, options.ratio);
+      const head = chars.slice(0, boldLen).join('');
+      const tail = chars.slice(boldLen).join('');
+      if (head) segments.push({ text: head, bold: true });
+      if (tail) segments.push({ text: tail, bold: false });
+
+      lastIndex = start + word.length;
+    }
+    if (lastIndex < text.length) {
+      segments.push({ text: text.slice(lastIndex), bold: false });
+    }
+    return segments;
+  }
+
   const InkboltCore = {
     computeBoldLength,
     buildBionicFragment,
     bionicifyPlainText,
+    segmentBionic,
     toMathBoldChar,
     WORD_RE,
     DEFAULTS,
