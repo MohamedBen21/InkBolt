@@ -26,9 +26,11 @@ inkbolt/
       style.css
       vendor/
         jszip.min.js       <- vendored, zero network dependency
-        pdf.min.js         <- pdf.js, for reading PDFs
+        pdf.min.js         <- pdf.js, for reading PDFs + rendering pages
         pdf.worker.min.js
-        pdf-lib.min.js     <- for writing PDFs
+        pdf-lib.min.js     <- for editing/writing PDFs in place
+        standard_fonts/    <- required by pdf.js to render non-embedded
+                              standard fonts (Helvetica, etc.) to canvas
     manifest.chrome.json
     manifest.firefox.json
     build.sh             <- assembles dist/chrome and dist/firefox
@@ -83,31 +85,38 @@ If you edit anything under `extension/src/` or `extension/epub-tool/`, run
   text, so bolding uses actual Unicode Mathematical Bold characters
   (distinct code points, not styling) — the file stays genuinely plain
   text.
-- **Same format in, same format out — with one honest exception.**
-  `.epub` → `.epub`, `.txt` → `.txt`, both keeping their exact original
-  layout and fonts. `.pdf` → `.pdf` too, but PDFs don't have reflowable
-  text the way EPUB/HTML do — there's no way to "keep the original layout"
-  for extracted PDF text without a much bigger project (real layout
-  reconstruction, font subsetting, etc.). So the PDF path deliberately
-  stays simple: extract the real text with pdf.js, bold it with the exact
-  same engine as everything else, and lay it out cleanly on fresh pages
-  with pdf-lib — accurate text and correct bolding, in a clean standard
-  layout rather than a pixel-match of the original. Scanned/image-only
-  pages are detected and left with a clear note rather than silently
-  producing a blank page.
-- **Zero network dependency where it matters.** JSZip is vendored locally
-  inside `extension/epub-tool/vendor/`, both because a packaged extension
-  page's CSP won't allow remote scripts by default, and because it means
-  the whole tool works offline.
+- **Same format in, same format out — including PDF's actual layout.**
+  `.epub` → `.epub`, `.txt` → `.txt`, `.pdf` → `.pdf`, all keeping their
+  original layout, fonts, tables, images, and colors. The PDF path loads
+  the *original* file via pdf-lib (not a fresh blank document) and draws
+  bold-prefix text directly on top of the existing content, in place —
+  it never rebuilds pages from scratch. To do this correctly even on
+  colored backgrounds (table headers, logos, etc.), each page is rendered
+  once to an offscreen canvas so the real background and ink color behind
+  every bold span can be sampled and matched, rather than assuming white
+  background and black text. Word positions are estimated via calibrated
+  font-metrics (pdf.js reports each text run's true width; that's used to
+  scale our own font measurements to match the specific document's actual
+  spacing) — this went through several rounds of visual testing to get
+  right, including catching and fixing a real bug where the cover box
+  could bleed into an adjacent untouched character (e.g. turning
+  "regular" into "reguar") before landing on the current inward-shrink
+  approach. Scanned/image-only pages are detected and left completely
+  untouched — no edits, no notice drawn on them.
+- **Zero network dependency where it matters.** JSZip, pdf.js, pdf-lib,
+  and pdf.js's standard font data are all vendored locally inside
+  `extension/epub-tool/vendor/`, both because a packaged extension page's
+  CSP won't allow remote scripts by default, and because it means the
+  whole tool works offline.
 
 ## Roadmap status
 
 - ✅ Core transform engine, page-wide application, live-content watcher
   (MutationObserver), settings (global/per-site/intensity), toggle-off
   revert — all in the extension
-- ✅ E-book converter: EPUB → EPUB, TXT → TXT, and PDF → PDF (extracted
-  text, cleanly re-laid-out — see design principles above), bundled into
-  the extension and reachable from the popup
+- ✅ E-book converter: EPUB → EPUB, TXT → TXT, and PDF → PDF with the
+  original layout/tables/images fully preserved (see design principles
+  above), bundled into the extension and reachable from the popup
 - ✅ Brand identity: name, logo, palette, applied across extension, popup,
   e-book tool, and a marketing site
 - ✅ Icon-font protection: detects and skips Font Awesome/Material Icons/etc.

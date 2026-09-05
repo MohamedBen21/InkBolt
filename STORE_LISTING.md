@@ -49,10 +49,9 @@ turn it off entirely on sites where you don't want it.
 ✅ **Convert your e-books, too.** A built-in converter (right in the
 popup) bolds the text inside EPUB files — and keeps them as EPUB. TXT
 files stay TXT, using real bold Unicode characters. PDFs stay PDFs too —
-text is extracted and cleanly re-laid-out (PDFs don't support reflowable
-text like EPUB does, so the original's exact fonts/columns/images aren't
-preserved, only the text itself, now bolded). Nothing is uploaded
-anywhere; conversion happens entirely in your browser.
+the original layout, tables, images, and colors are untouched; only the
+bolded portions of each word are drawn on top, in place. Nothing is
+uploaded anywhere; conversion happens entirely in your browser.
 
 ✅ **Icon-font safe.** Inkbolt detects and skips icon fonts (Font
 Awesome, Material Icons, and others) so it never breaks a site's icons

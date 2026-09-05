@@ -212,15 +212,13 @@
   }
 
   // Simple, fixed page layout for the PDF output — this tool doesn't try
-  // to preserve the original PDF's exact layout/fonts/images (PDFs don't
-  // have reflowable text the way EPUB/HTML do, and doing a full visual
-  // reconstruction is a much bigger project). Instead: extract the real
-  // text, bold it correctly, and lay it out cleanly on fresh pages.
-  const PDF_PAGE_W = 612; // US Letter, points
-  const PDF_PAGE_H = 792;
-  const PDF_MARGIN = 54;
-  const PDF_FONT_SIZE = 12;
-  const PDF_LINE_HEIGHT = 16;
+  // This tool loads the ORIGINAL PDF and only draws on top of it — every
+  // table, image, colored block, and line stays exactly as it was. Only
+  // the leading letters of each word get a bold overlay drawn precisely
+  // in place, using the real background and ink colors sampled from a
+  // rendered copy of the page (so it works correctly even on colored
+  // table headers, not just plain white text).
+  const PDF_RENDER_SCALE = 3; // higher = more accurate color sampling, slower
 
   let pdfWorkerConfigured = false;
   function configurePdfWorkerOnce() {
@@ -229,108 +227,157 @@
     pdfWorkerConfigured = true;
   }
 
-  async function extractPdfPageTexts(file) {
-    configurePdfWorkerOnce();
-    const buffer = await file.arrayBuffer();
-    const doc = await window.pdfjsLib.getDocument({ data: buffer }).promise;
-    const pageTexts = [];
-    for (let i = 1; i <= doc.numPages; i++) {
-      const page = await doc.getPage(i);
-      const content = await page.getTextContent();
-      const text = content.items
-        .map((item) => item.str)
-        .join(' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-      pageTexts.push(text);
+  function luminance([r, g, b]) {
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  /**
+   * Exhaustively scans every pixel in a glyph's approximate bounding box
+   * (not a sparse sample grid, which can miss thin strokes) to find:
+   * - bg: the background color, averaged from the box's four corners
+   *   (almost always clear of ink)
+   * - ink: whichever pixel in the box is furthest in color from that
+   *   background — works for dark-on-light OR light-on-dark text,
+   *   without assuming which direction the contrast goes.
+   */
+  function sampleBoxColors(ctx, canvas, pageHeightPt, pdfX, pdfWidth, baseY, fontSize) {
+    function pdfToCanvas(x, y) {
+      return [Math.round(x * PDF_RENDER_SCALE), Math.round((pageHeightPt - y) * PDF_RENDER_SCALE)];
     }
-    return pageTexts;
+    const [cx1, cy1] = pdfToCanvas(pdfX, baseY + fontSize * 0.78);
+    const [cx2, cy2] = pdfToCanvas(pdfX + pdfWidth, baseY - fontSize * 0.22);
+    const x = Math.max(0, Math.min(canvas.width - 1, Math.min(cx1, cx2)));
+    const y = Math.max(0, Math.min(canvas.height - 1, Math.min(cy1, cy2)));
+    const w = Math.max(1, Math.min(canvas.width - x, Math.abs(cx2 - cx1)));
+    const h = Math.max(1, Math.min(canvas.height - y, Math.abs(cy2 - cy1)));
+    const data = ctx.getImageData(x, y, w, h).data;
+
+    const corners = [[0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1]].map(([px, py]) => {
+      const i = (py * w + px) * 4;
+      return [data[i], data[i + 1], data[i + 2]];
+    });
+    const bg = [0, 1, 2].map((c) => Math.round(corners.reduce((s, p) => s + p[c], 0) / 4));
+    const bgLum = luminance(bg);
+
+    let ink = bg, bestDist = -1;
+    for (let i = 0; i < data.length; i += 4) {
+      const px = [data[i], data[i + 1], data[i + 2]];
+      const dist = Math.hypot(px[0] - bg[0], px[1] - bg[1], px[2] - bg[2]);
+      if (dist > bestDist) { bestDist = dist; ink = px; }
+    }
+    if (bestDist <= 25) ink = bgLum >= 128 ? [0, 0, 0] : [255, 255, 255];
+    return { bg, ink };
   }
 
   async function processPdf(file, ratio) {
     if (typeof window.pdfjsLib === 'undefined' || typeof window.PDFLib === 'undefined') {
       throw new Error('PDF libraries failed to load — try reloading the page.');
     }
+    configurePdfWorkerOnce();
 
-    setProgress(10, 'Reading PDF pages…');
-    const pageTexts = await extractPdfPageTexts(file);
-    logLine(`✓ Extracted text from ${pageTexts.length} page(s)`);
+    // Two independent copies: pdf.js may transfer/detach its buffer for
+    // worker use, so pdf-lib needs its own untouched copy.
+    const bufForJs = await file.arrayBuffer();
+    const bufForLib = bufForJs.slice(0);
 
-    setProgress(35, 'Laying out bolded text…');
+    setProgress(5, 'Opening PDF…');
+    const jsDoc = await window.pdfjsLib.getDocument({
+      data: bufForJs,
+      standardFontDataUrl: 'vendor/standard_fonts/',
+    }).promise;
+
     const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
-    const out = await PDFDocument.create();
-    const fontReg = await out.embedFont(StandardFonts.Helvetica);
-    const fontBold = await out.embedFont(StandardFonts.HelveticaBold);
+    const outDoc = await PDFDocument.load(bufForLib);
+    const fontBold = await outDoc.embedFont(StandardFonts.HelveticaBold);
+    const fontReg = await outDoc.embedFont(StandardFonts.Helvetica); // metrics reference only, never drawn
+    const rgbToUnit = ([r, g, b]) => rgb(r / 255, g / 255, b / 255);
 
     let wordCount = 0;
-    let emptyPageCount = 0;
-    const maxWidth = PDF_PAGE_W - PDF_MARGIN * 2;
-    const spaceWidth = fontReg.widthOfTextAtSize(' ', PDF_FONT_SIZE);
+    let pagesWithText = 0;
+    const numPages = jsDoc.numPages;
 
-    for (let p = 0; p < pageTexts.length; p++) {
-      const pageText = pageTexts[p];
-      let page = out.addPage([PDF_PAGE_W, PDF_PAGE_H]);
-      let x = PDF_MARGIN;
-      let y = PDF_PAGE_H - PDF_MARGIN;
+    for (let pi = 1; pi <= numPages; pi++) {
+      const jsPage = await jsDoc.getPage(pi);
+      const content = await jsPage.getTextContent({ disableCombineTextItems: true });
+      const outPage = outDoc.getPage(pi - 1);
 
-      if (!pageText) {
-        emptyPageCount++;
-        page.drawText('(No extractable text on this page — likely a scan or an image.)', {
-          x: PDF_MARGIN,
-          y,
-          size: PDF_FONT_SIZE,
-          font: fontReg,
-          color: rgb(0.55, 0.55, 0.55),
-        });
-        continue;
+      const hasText = content.items.some((it) => it.str && it.str.trim());
+      if (hasText) {
+        pagesWithText++;
+        // Render this page once so we can sample real background/ink
+        // colors for every bold span on it.
+        const viewport = jsPage.getViewport({ scale: PDF_RENDER_SCALE });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        await jsPage.render({ canvasContext: ctx, viewport }).promise;
+        const pageHeightPt = viewport.height / PDF_RENDER_SCALE;
+
+        for (const item of content.items) {
+          const str = item.str;
+          if (!str || !str.trim()) continue;
+          const fontSize = Math.hypot(item.transform[0], item.transform[1]);
+          const baseX = item.transform[4];
+          const baseY = item.transform[5];
+          // Our own regular-font metrics approximate the original font's
+          // spacing; calibrated against the item's real known width so
+          // the estimate matches this specific document's actual spacing.
+          const ourFullWidth = fontReg.widthOfTextAtSize(str, fontSize);
+          const calibration = ourFullWidth > 0 ? item.width / ourFullWidth : 1;
+
+          const wordRe = /[^\s]+/g;
+          let m;
+          while ((m = wordRe.exec(str)) !== null) {
+            const segs = window.InkboltCore.segmentBionic(m[0], { ratio });
+            let cursorInStr = m.index;
+            for (const seg of segs) {
+              const prefixWidth = fontReg.widthOfTextAtSize(str.slice(0, cursorInStr), fontSize);
+              const x = baseX + prefixWidth * calibration;
+              const segWidth = fontReg.widthOfTextAtSize(seg.text, fontSize) * calibration;
+
+              if (seg.bold) {
+                const { bg, ink } = sampleBoxColors(ctx, canvas, pageHeightPt, x, segWidth, baseY, fontSize);
+                // Shrink the cover box inward rather than pad it outward:
+                // a faint sliver of un-covered original ink at the very
+                // edge is a minor cosmetic artifact, but padding outward
+                // risks bleeding into the NEXT untouched character and
+                // erasing part of it (e.g. "regular" -> "reguar").
+                const shrink = segWidth * 0.05;
+                outPage.drawRectangle({
+                  x: x + shrink / 2,
+                  y: baseY - fontSize * 0.2,
+                  width: Math.max(0, segWidth - shrink),
+                  height: fontSize * 1.0,
+                  color: rgbToUnit(bg),
+                });
+                outPage.drawText(seg.text, { x, y: baseY, size: fontSize, font: fontBold, color: rgbToUnit(ink) });
+                wordCount++;
+              }
+              cursorInStr += seg.text.length;
+            }
+          }
+        }
       }
 
-      const tokens = pageText.split(' ').filter(Boolean);
-      for (const token of tokens) {
-        const segs = window.InkboltCore.segmentBionic(token, { ratio });
-        const tokenWidth = segs.reduce(
-          (w, s) => w + (s.bold ? fontBold : fontReg).widthOfTextAtSize(s.text, PDF_FONT_SIZE),
-          0
-        );
-
-        // Wrap to a new line if this token won't fit.
-        if (x + tokenWidth > PDF_MARGIN + maxWidth && x > PDF_MARGIN) {
-          x = PDF_MARGIN;
-          y -= PDF_LINE_HEIGHT;
-        }
-        // Start a new page if we've run out of vertical room.
-        if (y < PDF_MARGIN) {
-          page = out.addPage([PDF_PAGE_W, PDF_PAGE_H]);
-          x = PDF_MARGIN;
-          y = PDF_PAGE_H - PDF_MARGIN;
-        }
-
-        for (const seg of segs) {
-          const font = seg.bold ? fontBold : fontReg;
-          page.drawText(seg.text, { x, y, size: PDF_FONT_SIZE, font, color: rgb(0.1, 0.08, 0.15) });
-          x += font.widthOfTextAtSize(seg.text, PDF_FONT_SIZE);
-        }
-        x += spaceWidth;
-        wordCount++;
-      }
-
-      setProgress(35 + Math.round(((p + 1) / pageTexts.length) * 55), `Page ${p + 1} of ${pageTexts.length}…`);
+      setProgress(5 + Math.round((pi / numPages) * 90), `Page ${pi} of ${numPages}…`);
     }
 
-    logLine(`✓ ${wordCount} word(s) bolded across ${pageTexts.length} page(s)`);
-    if (emptyPageCount > 0) {
-      logLine(`⚠ ${emptyPageCount} page(s) had no extractable text (likely scanned images)`);
+    logLine(`✓ ${wordCount} bold span(s) applied across ${pagesWithText} page(s) with text`);
+    const pagesWithoutText = numPages - pagesWithText;
+    if (pagesWithoutText > 0) {
+      logLine(`ℹ ${pagesWithoutText} page(s) had no extractable text (likely scans/images) and were left untouched`);
     }
 
-    setProgress(95, 'Saving PDF…');
-    const pdfBytes = await out.save();
+    setProgress(97, 'Saving PDF…');
+    const pdfBytes = await outDoc.save();
     setProgress(100, 'Done!');
 
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     return {
       blob,
       filename: file.name.replace(/\.pdf$/i, '') + '-inkbolt.pdf',
-      summary: `Stays a .pdf file — ${wordCount} word(s) bolded across ${pageTexts.length} page(s). Note: PDFs don't have reflowable text like EPUB, so this rebuilds the pages with the extracted text in a clean standard layout rather than preserving the original's exact fonts, columns, or images.${emptyPageCount ? ` ${emptyPageCount} page(s) had no extractable text (likely scanned/image-only) and were left blank with a note.` : ''}`,
+      summary: `Stays a .pdf file — the original layout, tables, images, and colors are untouched; only the bolded portions of each word are redrawn in place. ${wordCount} bold span(s) applied across ${pagesWithText} page(s).${pagesWithoutText ? ` ${pagesWithoutText} page(s) had no extractable text (likely scanned/image-only) and were left exactly as-is.` : ''}`,
     };
   }
 
