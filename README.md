@@ -93,16 +93,31 @@ If you edit anything under `extension/src/` or `extension/epub-tool/`, run
   it never rebuilds pages from scratch. To do this correctly even on
   colored backgrounds (table headers, logos, etc.), each page is rendered
   once to an offscreen canvas so the real background and ink color behind
-  every bold span can be sampled and matched, rather than assuming white
-  background and black text. Word positions are estimated via calibrated
-  font-metrics (pdf.js reports each text run's true width; that's used to
-  scale our own font measurements to match the specific document's actual
-  spacing) — this went through several rounds of visual testing to get
-  right, including catching and fixing a real bug where the cover box
-  could bleed into an adjacent untouched character (e.g. turning
-  "regular" into "reguar") before landing on the current inward-shrink
-  approach. Scanned/image-only pages are detected and left completely
-  untouched — no edits, no notice drawn on them.
+  every bold span can be sampled and matched (using a median over many
+  edge pixels, not just 4 corners — a single stray pixel on a diacritic
+  or antialiased edge was enough to skew a small average toward a visible
+  gray box). Word positions are found by scanning the rendered pixels for
+  actual ink columns rather than trusting font-metric estimates: real
+  documents essentially never use one of the 14 standard PDF fonts we can
+  embed for measurement (this one uses "Outfit-Bold" and "Bitter-Regular"),
+  and metric estimates drift increasingly across a long string when the
+  assumed and actual fonts have different relative letter widths — pixel
+  detection is measured from what's actually rendered, so it stays
+  accurate regardless of the real font. Text already set in a bold font
+  (headings, typically) is left untouched entirely — there's no
+  meaningful weight contrast left to add, and it's the one case where a
+  substitute bold typeface's shape can visibly differ from the original at
+  a glance. Font extraction (reusing the document's own embedded font
+  instead of a substitute) was evaluated and rejected: PDF-embedded
+  subsetted fonts commonly omit the `cmap` table entirely, since the PDF's
+  own CID encoding addresses glyphs directly — reusing them would mean
+  bypassing standard text-shaping APIs for raw glyph-ID manipulation,
+  which is a real, standard technique in dedicated PDF-editing libraries
+  but is a poor fit for "simple and robust" here. A substitute standard
+  font is also what real-world PDF annotation/highlighting tools
+  typically use for overlay content, for the same reliability reason.
+  Scanned/image-only pages are detected and left completely untouched —
+  no edits, no notice drawn on them.
 - **Zero network dependency where it matters.** JSZip, pdf.js, pdf-lib,
   and pdf.js's standard font data are all vendored locally inside
   `extension/epub-tool/vendor/`, both because a packaged extension page's

@@ -211,14 +211,21 @@
     };
   }
 
-  // Simple, fixed page layout for the PDF output — this tool doesn't try
   // This tool loads the ORIGINAL PDF and only draws on top of it — every
   // table, image, colored block, and line stays exactly as it was. Only
   // the leading letters of each word get a bold overlay drawn precisely
   // in place, using the real background and ink colors sampled from a
   // rendered copy of the page (so it works correctly even on colored
   // table headers, not just plain white text).
-  const PDF_RENDER_SCALE = 3; // higher = more accurate color sampling, slower
+  //
+  // Word positions are found by scanning the rendered pixels for actual
+  // ink columns rather than trusting font-metric estimates — real-world
+  // PDFs almost never use one of the 14 standard PDF fonts we can embed
+  // for measurement, and different fonts have different relative letter
+  // widths, so a metric-only estimate drifts increasingly across a long
+  // string. Pixel detection is measured from what's actually rendered,
+  // so it's accurate regardless of what font the document really uses.
+  const PDF_RENDER_SCALE = 3; // higher = more accurate color/position sampling, slower
 
   let pdfWorkerConfigured = false;
   function configurePdfWorkerOnce() {
@@ -231,14 +238,35 @@
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 
+  function median(arr) {
+    const s = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+  }
+
   /**
-   * Exhaustively scans every pixel in a glyph's approximate bounding box
-   * (not a sparse sample grid, which can miss thin strokes) to find:
-   * - bg: the background color, averaged from the box's four corners
-   *   (almost always clear of ink)
-   * - ink: whichever pixel in the box is furthest in color from that
-   *   background — works for dark-on-light OR light-on-dark text,
-   *   without assuming which direction the contrast goes.
+   * Robust background estimate: samples every pixel along the box's top
+   * and bottom edges (not just 4 corners — a single stray ink pixel there,
+   * e.g. from a diacritic or antialiasing, would skew a small average
+   * toward gray) and takes the per-channel MEDIAN, which stays accurate
+   * even when a minority of samples land on actual ink.
+   */
+  function sampleRobustBackground(ctx, x, yTop, w, h) {
+    const rs = [], gs = [], bs = [];
+    for (const row of [0, h - 1]) {
+      const data = ctx.getImageData(x, yTop + row, w, 1).data;
+      for (let col = 0; col < w; col++) {
+        rs.push(data[col * 4]); gs.push(data[col * 4 + 1]); bs.push(data[col * 4 + 2]);
+      }
+    }
+    return [Math.round(median(rs)), Math.round(median(gs)), Math.round(median(bs))];
+  }
+
+  /**
+   * Finds background and ink color for a glyph box. Ink is whichever
+   * pixel is furthest in color from the background — works for
+   * dark-on-light OR light-on-dark text without assuming which direction
+   * the contrast goes.
    */
   function sampleBoxColors(ctx, canvas, pageHeightPt, pdfX, pdfWidth, baseY, fontSize) {
     function pdfToCanvas(x, y) {
@@ -250,15 +278,11 @@
     const y = Math.max(0, Math.min(canvas.height - 1, Math.min(cy1, cy2)));
     const w = Math.max(1, Math.min(canvas.width - x, Math.abs(cx2 - cx1)));
     const h = Math.max(1, Math.min(canvas.height - y, Math.abs(cy2 - cy1)));
-    const data = ctx.getImageData(x, y, w, h).data;
 
-    const corners = [[0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1]].map(([px, py]) => {
-      const i = (py * w + px) * 4;
-      return [data[i], data[i + 1], data[i + 2]];
-    });
-    const bg = [0, 1, 2].map((c) => Math.round(corners.reduce((s, p) => s + p[c], 0) / 4));
+    const bg = sampleRobustBackground(ctx, x, y, w, h);
     const bgLum = luminance(bg);
 
+    const data = ctx.getImageData(x, y, w, h).data;
     let ink = bg, bestDist = -1;
     for (let i = 0; i < data.length; i += 4) {
       const px = [data[i], data[i + 1], data[i + 2]];
@@ -267,6 +291,76 @@
     }
     if (bestDist <= 25) ink = bgLum >= 128 ? [0, 0, 0] : [255, 255, 255];
     return { bg, ink };
+  }
+
+  /**
+   * Scans a text item's full bounding box in the rendered canvas for real
+   * ink columns, then groups them into word blobs separated by gaps wider
+   * than a threshold (word spaces are much wider than the gaps between
+   * letters within a word). Returns pixel-accurate [xStart, xEnd] (in PDF
+   * point space) for each detected word, in reading order.
+   */
+  function detectWordBoundsFromPixels(ctx, canvas, pageHeightPt, baseX, itemWidth, baseY, fontSize, bg) {
+    function pdfToCanvasX(x) { return Math.round(x * PDF_RENDER_SCALE); }
+    function pdfToCanvasY(y) { return Math.round((pageHeightPt - y) * PDF_RENDER_SCALE); }
+    const xStartPx = pdfToCanvasX(baseX);
+    const xEndPx = pdfToCanvasX(baseX + itemWidth);
+    const yTopPx = pdfToCanvasY(baseY + fontSize * 0.78);
+    const yBotPx = pdfToCanvasY(baseY - fontSize * 0.22);
+    const x = Math.max(0, Math.min(canvas.width - 1, xStartPx));
+    const yTop = Math.max(0, Math.min(canvas.height - 1, yTopPx));
+    const w = Math.max(1, Math.min(canvas.width - x, xEndPx - xStartPx));
+    const h = Math.max(1, Math.min(canvas.height - yTop, yBotPx - yTopPx));
+    if (w <= 0 || h <= 0) return null;
+
+    const data = ctx.getImageData(x, yTop, w, h).data;
+    const colHasInk = new Array(w).fill(false);
+    const threshold = 30;
+    for (let col = 0; col < w; col++) {
+      for (let row = 0; row < h; row++) {
+        const i = (row * w + col) * 4;
+        const px = [data[i], data[i + 1], data[i + 2]];
+        if (Math.hypot(px[0] - bg[0], px[1] - bg[1], px[2] - bg[2]) > threshold) { colHasInk[col] = true; break; }
+      }
+    }
+    const inkRuns = [];
+    let runStart = null;
+    for (let col = 0; col <= w; col++) {
+      const has = col < w ? colHasInk[col] : false;
+      if (has && runStart === null) runStart = col;
+      if (!has && runStart !== null) { inkRuns.push([runStart, col - 1]); runStart = null; }
+    }
+    if (inkRuns.length === 0) return null;
+
+    const wordGapThresholdPx = fontSize * PDF_RENDER_SCALE * 0.18;
+    const words = [];
+    let curStart = inkRuns[0][0], curEnd = inkRuns[0][1];
+    for (let i = 1; i < inkRuns.length; i++) {
+      const gap = inkRuns[i][0] - curEnd;
+      if (gap > wordGapThresholdPx) { words.push([curStart, curEnd]); curStart = inkRuns[i][0]; curEnd = inkRuns[i][1]; }
+      else { curEnd = inkRuns[i][1]; }
+    }
+    words.push([curStart, curEnd]);
+    return words.map(([s, e]) => [baseX + s / PDF_RENDER_SCALE, baseX + (e + 1) / PDF_RENDER_SCALE]);
+  }
+
+  /**
+   * Checks the document's ACTUAL underlying font (not our substitute
+   * font) to see if it's already a bold weight. If so, skip bionic
+   * processing for this text entirely — there's no meaningful weight
+   * contrast left to add, and overlaying a different bold typeface on
+   * top of already-bold text (often large heading text, where any shape
+   * difference between typefaces is most visible) is the one case that
+   * can look like a rendering glitch rather than an improvement.
+   */
+  function isAlreadyBoldFont(page, fontName) {
+    try {
+      const fontObj = page.commonObjs.get(fontName);
+      const name = (fontObj && fontObj.name) || '';
+      return /bold|black|heavy|extrabold|semibold/i.test(name);
+    } catch (e) {
+      return false; // unknown -> treat as regular weight, process normally
+    }
   }
 
   async function processPdf(file, ratio) {
@@ -304,8 +398,6 @@
       const hasText = content.items.some((it) => it.str && it.str.trim());
       if (hasText) {
         pagesWithText++;
-        // Render this page once so we can sample real background/ink
-        // colors for every bold span on it.
         const viewport = jsPage.getViewport({ scale: PDF_RENDER_SCALE });
         const canvas = document.createElement('canvas');
         canvas.width = viewport.width;
@@ -317,24 +409,55 @@
         for (const item of content.items) {
           const str = item.str;
           if (!str || !str.trim()) continue;
+          if (isAlreadyBoldFont(jsPage, item.fontName)) continue;
+
           const fontSize = Math.hypot(item.transform[0], item.transform[1]);
           const baseX = item.transform[4];
           const baseY = item.transform[5];
-          // Our own regular-font metrics approximate the original font's
-          // spacing; calibrated against the item's real known width so
-          // the estimate matches this specific document's actual spacing.
+          const tokens = str.match(/[^\s]+/g) || [];
+          if (tokens.length === 0) continue;
+
+          const { bg: itemBg } = sampleBoxColors(ctx, canvas, pageHeightPt, baseX, item.width, baseY, fontSize);
+          const pixelWords = detectWordBoundsFromPixels(ctx, canvas, pageHeightPt, baseX, item.width, baseY, fontSize, itemBg);
+          // If pixel detection didn't cleanly find one blob per word
+          // (rare — very tight kerning, connected script fonts), fall
+          // back to a font-metric estimate for this item only.
+          const useFallback = !pixelWords || pixelWords.length !== tokens.length;
+
           const ourFullWidth = fontReg.widthOfTextAtSize(str, fontSize);
           const calibration = ourFullWidth > 0 ? item.width / ourFullWidth : 1;
+          let cursorInStr = 0;
 
-          const wordRe = /[^\s]+/g;
-          let m;
-          while ((m = wordRe.exec(str)) !== null) {
-            const segs = window.InkboltCore.segmentBionic(m[0], { ratio });
-            let cursorInStr = m.index;
+          for (let ti = 0; ti < tokens.length; ti++) {
+            const token = tokens[ti];
+            const tokenStart = str.indexOf(token, cursorInStr);
+            cursorInStr = tokenStart;
+
+            let wordPixelStart, wordPixelEnd;
+            if (!useFallback) {
+              [wordPixelStart, wordPixelEnd] = pixelWords[ti];
+            } else {
+              const prefixWidth = fontReg.widthOfTextAtSize(str.slice(0, tokenStart), fontSize);
+              wordPixelStart = baseX + prefixWidth * calibration;
+              wordPixelEnd = wordPixelStart + fontReg.widthOfTextAtSize(token, fontSize) * calibration;
+            }
+            const wordPixelWidth = wordPixelEnd - wordPixelStart;
+
+            const segs = window.InkboltCore.segmentBionic(token, { ratio });
+            const wordMetricWidth = fontReg.widthOfTextAtSize(token, fontSize);
+            let metricCursor = 0;
+
             for (const seg of segs) {
-              const prefixWidth = fontReg.widthOfTextAtSize(str.slice(0, cursorInStr), fontSize);
-              const x = baseX + prefixWidth * calibration;
-              const segWidth = fontReg.widthOfTextAtSize(seg.text, fontSize) * calibration;
+              // Intra-word position is still a font-metric proportion,
+              // but now bounded to a single short word's span (a few
+              // characters) instead of a whole sentence — any metric
+              // mismatch can't accumulate nearly as far, since the outer
+              // word bounds come from real pixels, not the estimate.
+              const fracStart = wordMetricWidth > 0 ? metricCursor / wordMetricWidth : 0;
+              const segMetricWidth = fontReg.widthOfTextAtSize(seg.text, fontSize);
+              const fracEnd = wordMetricWidth > 0 ? (metricCursor + segMetricWidth) / wordMetricWidth : 1;
+              const x = wordPixelStart + fracStart * wordPixelWidth;
+              const segWidth = (fracEnd - fracStart) * wordPixelWidth;
 
               if (seg.bold) {
                 const { bg, ink } = sampleBoxColors(ctx, canvas, pageHeightPt, x, segWidth, baseY, fontSize);
@@ -354,8 +477,9 @@
                 outPage.drawText(seg.text, { x, y: baseY, size: fontSize, font: fontBold, color: rgbToUnit(ink) });
                 wordCount++;
               }
-              cursorInStr += seg.text.length;
+              metricCursor += segMetricWidth;
             }
+            cursorInStr = tokenStart + token.length;
           }
         }
       }
@@ -377,7 +501,7 @@
     return {
       blob,
       filename: file.name.replace(/\.pdf$/i, '') + '-inkbolt.pdf',
-      summary: `Stays a .pdf file — the original layout, tables, images, and colors are untouched; only the bolded portions of each word are redrawn in place. ${wordCount} bold span(s) applied across ${pagesWithText} page(s).${pagesWithoutText ? ` ${pagesWithoutText} page(s) had no extractable text (likely scanned/image-only) and were left exactly as-is.` : ''}`,
+      summary: `Stays a .pdf file — the original layout, tables, images, and colors are untouched; only the bolded portions of each word are redrawn in place. Headings already set in a bold font are left as-is (no extra contrast to add). ${wordCount} bold span(s) applied across ${pagesWithText} page(s).${pagesWithoutText ? ` ${pagesWithoutText} page(s) had no extractable text (likely scanned/image-only) and were left exactly as-is.` : ''}`,
     };
   }
 
