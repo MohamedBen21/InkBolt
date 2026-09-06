@@ -33,12 +33,18 @@ inkbolt/
                               standard fonts (Helvetica, etc.) to canvas
     manifest.chrome.json
     manifest.firefox.json
-    build.sh             <- assembles dist/chrome and dist/firefox
+    build.sh             <- assembles dist/chrome, dist/firefox, AND the
+                              upload-ready dist/inkbolt-{chrome,firefox}-vX.Y.Z.zip
     icons/
   site/                <- marketing/info landing page (static, standalone)
     index.html
     privacy.html
     style.css
+    vercel.json          <- one-command deploy: `vercel --prod` from site/
+    netlify.toml          <- one-command deploy: `netlify deploy --prod`
+  .github/workflows/
+    ci.yml                <- syntax-checks + builds the extension on every push
+    deploy-site.yml        <- auto-deploys site/ to GitHub Pages on push
   assets/
     icon.svg             <- master logo source
     social-preview.png   <- GitHub repo social card (1280x640)
@@ -49,6 +55,7 @@ inkbolt/
   BRAND.md             <- full identity system
   PRIVACY.md           <- privacy policy (also hosted at site/privacy.html)
   STORE_LISTING.md     <- Chrome Web Store / AMO listing copy
+  DEPLOY.md            <- exact remaining steps: hosting + store submission
   README.md            <- this file
 ```
 
@@ -140,11 +147,19 @@ If you edit anything under `extension/src/` or `extension/epub-tool/`, run
 - ✅ Store submission prep: privacy policy (`PRIVACY.md` + hosted
   `site/privacy.html`), listing copy (`STORE_LISTING.md`), and required
   promotional images (`assets/store/`)
-- ⏭ Next up: actually host `site/` somewhere real (Vercel/GitHub
-  Pages/Netlify), swap the placeholder privacy-policy URL in
-  `STORE_LISTING.md` for the real one, then submit to the Chrome Web
-  Store ($5 one-time fee, zip `extension/dist/chrome`) and Firefox AMO
-  (free, zip `extension/dist/firefox`)
+- ✅ Deployment prep: one-click hosting configs for the marketing site
+  (Vercel, Netlify, GitHub Pages via Actions), a CI workflow that
+  syntax-checks and builds the extension on every push, and `build.sh`
+  now auto-generates the actual upload-ready submission zips (with
+  `manifest.json` correctly at the zip root) named after the version in
+  the manifest — see `DEPLOY.md` for the exact remaining steps
+- ⏭ Next up (needs your accounts/payment — see `DEPLOY.md` for the exact
+  steps): actually run the deploy (`vercel --prod`, `netlify deploy
+  --prod`, or push to trigger the GitHub Pages workflow), swap the
+  placeholder privacy-policy URL in `STORE_LISTING.md` for the real one,
+  then submit `extension/dist/inkbolt-chrome-v1.0.0.zip` to the Chrome
+  Web Store ($5 one-time fee) and `extension/dist/inkbolt-firefox-v1.0.0.zip`
+  to Firefox AMO (free)
 
 ## Testing notes
 
