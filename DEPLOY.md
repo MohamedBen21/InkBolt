@@ -6,6 +6,22 @@ automated can do on your behalf.
 
 ## 1. Host the site (pick one — all free)
 
+**Important — run this first, and again after any change to
+`extension/epub-tool/`, `extension/src/inkbolt-core.js`, or
+`assets/icon.svg`:**
+```
+./sync-site-assets.sh
+```
+Why: `site/` gets deployed as a completely standalone web root — Vercel,
+Netlify, and GitHub Pages all publish *only* that folder's contents,
+nothing outside it. But the e-book converter and the logo normally live
+under `extension/`, shared with the browser extension. This script
+copies what the site actually needs (the converter + its vendored
+libraries, the core engine, the logo) into `site/` itself, so the
+deployed site never has a broken link pointing outside its own folder.
+GitHub Pages runs this automatically as part of its deploy — Vercel and
+Netlify CLI deploys don't, so run it yourself first.
+
 **Option A — Vercel (fastest)**
 ```
 npm i -g vercel

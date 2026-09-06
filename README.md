@@ -42,6 +42,10 @@ inkbolt/
     style.css
     vercel.json          <- one-command deploy: `vercel --prod` from site/
     netlify.toml          <- one-command deploy: `netlify deploy --prod`
+  sync-site-assets.sh  <- copies the e-book converter + core engine + logo
+                            into site/ so it deploys as a self-contained
+                            folder (run before any Vercel/Netlify deploy;
+                            GitHub Pages runs it automatically)
   .github/workflows/
     ci.yml                <- syntax-checks + builds the extension on every push
     deploy-site.yml        <- auto-deploys site/ to GitHub Pages on push

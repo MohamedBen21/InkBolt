@@ -9,6 +9,10 @@ on:
     branches: [main]
     paths:
       - 'site/**'
+      - 'extension/epub-tool/**'
+      - 'extension/src/inkbolt-core.js'
+      - 'assets/icon.svg'
+      - 'sync-site-assets.sh'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch: {} # allows manual "Run workflow" from the Actions tab
 
@@ -30,6 +34,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Sync shared assets into site/
+        run: |
+          chmod +x sync-site-assets.sh
+          ./sync-site-assets.sh
 
       - name: Upload site/ as the Pages artifact
         uses: actions/upload-pages-artifact@v3
