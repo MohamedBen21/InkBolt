@@ -1,80 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Inkbolt — E-book Converter</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inkbolt — E-book & Document Converter</title>
+  <meta name="description" content="Convert EPUB, PDF, and TXT files to bionic fixation reading format. 100% private, client-side in your browser." />
+  <link rel="icon" href="../icons/icon48.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="card">
-    <header>
-      <svg class="logo" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <rect width="32" height="32" rx="8" fill="url(#g)" />
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#241a44" />
-            <stop offset="1" stop-color="#150f27" />
-          </linearGradient>
-        </defs>
-        <path d="M15 5 L9 17 L14 17 L12.5 27 L23 13 L17 13 L19 5 Z" fill="#FFC857" />
-      </svg>
-      <div class="wordmark">
-        <h1>Inkbolt</h1>
-        <span class="tagline">E-book Converter</span>
+
+  <!-- Sticky Top Navigation Bar -->
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </span>
+        <span class="brand-title">Inkbolt</span>
       </div>
+
+      <div class="nav-badge">
+        <span class="nav-badge-dot"></span>
+        <span>Offline E-book Engine</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="tool-main">
+    <!-- Hero Header -->
+    <header class="tool-hero">
+      <div class="tool-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <span>Free &bull; 100% In-Browser &bull; Private</span>
+      </div>
+      <h1>Convert E-books &amp; Documents to Bionic Format</h1>
+      <p class="tool-subtitle">
+        Bold leading word anchors for effortless reading speed on Kindle, Kobo, iPad, or desktop. Keeps your original layout, covers, and typography intact.
+      </p>
     </header>
 
-    <p class="intro">
-      Drop in an <strong>.epub</strong>, <strong>.txt</strong>, or
-      <strong>.pdf</strong> file. We bold the leading letters of each word
-      — same engine as the Inkbolt browser extension — and hand you back a
-      file in the <strong>same format</strong> you gave us. EPUB and TXT
-      keep their exact original layout/fonts; PDF keeps its original
-      layout, tables, images, and colors too — only the bolded portions
-      of each word are drawn on top, in place.
-    </p>
+    <!-- Main Converter Card -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-chip">Local Fixation Engine</span>
+          <h2 class="card-title">Drop your file to convert</h2>
+        </div>
+        <span class="privacy-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          Client-Side Only
+        </span>
+      </div>
 
-    <section id="dropzone" class="dropzone">
-      <input type="file" id="fileInput" accept=".epub,.txt,.pdf" hidden />
-      <div class="dropzone-inner">
-        <div class="dropzone-icon">⇪</div>
-        <p><strong>Drag a file here</strong> or click to browse</p>
-        <p class="dropzone-sub">.epub, .txt, and .pdf supported</p>
+      <!-- Dropzone -->
+      <section id="dropzone" class="dropzone">
+        <input type="file" id="fileInput" accept=".epub,.txt,.pdf" hidden />
+        <div class="dropzone-inner">
+          <div class="dropzone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <p class="dropzone-title"><strong>Drag and drop your file here</strong>, or <span class="browse-link">browse files</span></p>
+          <span class="dropzone-hint">Converts locally in your browser memory &mdash; nothing uploaded</span>
+          <div class="format-tags">
+            <span class="format-tag tag-primary">.EPUB</span>
+            <span class="format-tag">.PDF</span>
+            <span class="format-tag">.TXT</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fixation Intensity Options -->
+      <section class="options">
+        <div class="options-header">
+          <div class="options-label-group">
+            <span class="options-title">Fixation Intensity</span>
+            <span class="options-sub">Bold anchor weight per word</span>
+          </div>
+          <div class="ratio-preview" id="ratioPreview"><span class="bold">Read</span>ing</div>
+        </div>
+        <input type="range" id="ratioSlider" min="30" max="70" step="5" value="50" />
+        <div class="slider-labels">
+          <span>30% (Subtle)</span>
+          <span>50% (Balanced)</span>
+          <span>70% (Strong)</span>
+        </div>
+      </section>
+
+      <!-- Progress Section -->
+      <section id="progress" class="progress hidden">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <p id="progressLabel">Preparing…</p>
+        <ul id="progressLog"></ul>
+      </section>
+
+      <!-- Result Section -->
+      <section id="result" class="result hidden">
+        <p id="resultMsg"></p>
+        <a id="downloadLink" class="download-btn" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Converted File
+        </a>
+      </section>
+
+      <!-- Error Box -->
+      <section id="errorBox" class="error hidden"></section>
+
+      <!-- Calibre Notice Callout -->
+      <div class="calibre-tip">
+        <svg class="calibre-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <div>
+          Reading Kindle formats (MOBI, AZW3, KFX)? Convert them to EPUB first with <a href="https://calibre-ebook.com/" target="_blank" rel="noopener">Calibre</a> (free), then drop the EPUB here.
+        </div>
       </div>
     </section>
 
-    <section class="options">
-      <div class="label">
-        <strong>Bold intensity</strong>
-        <span class="sub">How much of each word is bolded</span>
+    <!-- 3-Column Highlights Grid -->
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <h3>100% Private &amp; Offline</h3>
+        <p>Your books and documents never leave your machine. Parsing and reconstruction happen strictly inside your browser memory.</p>
       </div>
-      <input type="range" id="ratioSlider" min="30" max="70" step="5" value="50" />
-      <div class="ratio-preview" id="ratioPreview"><span class="bold">Read</span>ing</div>
+
+      <div class="feature-card">
+        <div class="feature-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+        </div>
+        <h3>Design &amp; Layout Intact</h3>
+        <p>Inkbolt only bolds text nodes. Chapter titles, images, stylesheets, page layouts, and book covers remain untouched.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+          </svg>
+        </div>
+        <h3>E-Reader Compatible</h3>
+        <p>Drop the converted file straight onto your Kobo, Apple Books, or send it to your Kindle via Amazon's Send-to-Kindle.</p>
+      </div>
+    </div>
+
+    <!-- FAQ Accordion -->
+    <section class="faq-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <details>
+          <summary>How does fixation reading work on an e-reader?</summary>
+          <p>The human eye reads by jumping between anchor fixation points (saccades). By bolding the first few letters of every word, your eye latches onto words faster, reducing subvocalization and eye fatigue on e-ink screens.</p>
+        </details>
+        <details>
+          <summary>How do I get the converted file onto my Kindle?</summary>
+          <p>Amazon supports standard EPUBs through <a href="https://www.amazon.com/sendtokindle" target="_blank" rel="noopener">amazon.com/sendtokindle</a> or via your Kindle's personal email address. Amazon automatically delivers the converted EPUB wirelessly to your device.</p>
+        </details>
+        <details>
+          <summary>Does this work with DRM-protected books?</summary>
+          <p>Inkbolt processes standard, DRM-free EPUB and PDF documents. If your e-book is locked with Adobe or Amazon DRM, remove the DRM using tools like Calibre with DeDRM before converting.</p>
+        </details>
+      </div>
     </section>
-
-    <section id="progress" class="progress hidden">
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <p id="progressLabel">Preparing…</p>
-      <ul id="progressLog"></ul>
-    </section>
-
-    <section id="result" class="result hidden">
-      <p id="resultMsg"></p>
-      <a id="downloadLink" class="download-btn" download>Download converted file</a>
-    </section>
-
-    <section id="errorBox" class="error hidden"></section>
-
-    <footer>
-      <p>
-        MOBI, AZW3, and KFX aren't supported directly — convert to EPUB
-        first with <a href="https://calibre-ebook.com/" target="_blank" rel="noopener">Calibre</a>
-        (free), then drop the EPUB in here.
-      </p>
-    </footer>
   </main>
 
+  <!-- Extension Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>Inkbolt</strong> &mdash; Bold words. Faster reading.
+      </div>
+      <div>
+        <span>Browser Extension Edition</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Vendor & Core Scripts -->
   <script src="vendor/jszip.min.js"></script>
   <script src="vendor/pdf.min.js"></script>
   <script src="vendor/pdf-lib.min.js"></script>
