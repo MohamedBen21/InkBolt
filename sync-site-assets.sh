@@ -18,8 +18,13 @@ mkdir -p site/src
 cp -r extension/epub-tool site/epub-tool
 cp extension/src/inkbolt-core.js site/src/inkbolt-core.js
 cp assets/icon.svg site/icon.svg
+mkdir -p site/assets
+if [ -f assets/bg-video-muted.mp4 ]; then
+  cp assets/bg-video-muted.mp4 site/assets/bg-video.mp4
+fi
 
 echo "Synced into site/:"
 echo "  site/epub-tool/       <- from extension/epub-tool/"
 echo "  site/src/inkbolt-core.js  <- from extension/src/inkbolt-core.js"
 echo "  site/icon.svg          <- from assets/icon.svg"
+echo "  site/assets/bg-video.mp4 <- from assets/bg-video-muted.mp4"
