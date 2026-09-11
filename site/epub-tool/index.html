@@ -1,84 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Inkbolt — E-book Converter</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inkbolt — E-book Converter</title>
+  <link rel="icon" href="../icon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <main class="card">
-    <header>
-      <svg class="logo" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <rect width="32" height="32" rx="8" fill="url(#g)" />
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#241a44" />
-            <stop offset="1" stop-color="#150f27" />
-          </linearGradient>
-        </defs>
-        <path d="M15 5 L9 17 L14 17 L12.5 27 L23 13 L17 13 L19 5 Z" fill="#FFC857" />
-      </svg>
-      <div class="wordmark">
-        <h1>Inkbolt</h1>
-        <span class="tagline">E-book Converter</span>
-      </div>
-    </header>
 
-    <p class="intro">
-      Drop in an <strong>.epub</strong>, <strong>.txt</strong>, or
-      <strong>.pdf</strong> file. We bold the leading letters of each word
-      — same engine as the Inkbolt browser extension — and hand you back a
-      file in the <strong>same format</strong> you gave us. EPUB and TXT
-      keep their exact original layout/fonts; PDF keeps its original
-      layout, tables, images, and colors too — only the bolded portions
-      of each word are drawn on top, in place.
-    </p>
+  <!-- Ambient Blurry Video Background -->
+  <div class="bg-video-container" aria-hidden="true">
+    <video class="bg-video" autoplay loop muted playsinline poster="../assets/bg-poster.jpg">
+      <source src="../assets/book-video.mp4" type="video/mp4" />
+      <source src="../assets/bg-video.mp4" type="video/mp4" />
+    </video>
+    <div class="bg-tint"></div>
+  </div>
 
-    <section id="dropzone" class="dropzone">
-      <input type="file" id="fileInput" accept=".epub,.txt,.pdf" hidden />
-      <div class="dropzone-inner">
-        <div class="dropzone-icon">⇪</div>
-        <p><strong>Drag a file here</strong> or click to browse</p>
-        <p class="dropzone-sub">.epub, .txt, and .pdf supported</p>
-      </div>
-    </section>
+  <!-- Top Navigation Bar -->
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <a href="../index.html" class="brand" aria-label="Inkbolt Home">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </span>
+        Inkbolt
+      </a>
+      <a href="../index.html" class="btn-back">&larr; Back to Home</a>
+    </div>
+  </header>
 
-    <section class="options">
-      <div class="label">
-        <strong>Bold intensity</strong>
-        <span class="sub">How much of each word is bolded</span>
-      </div>
-      <input type="range" id="ratioSlider" min="30" max="70" step="5" value="50" />
-      <div class="ratio-preview" id="ratioPreview"><span class="bold">Read</span>ing</div>
-    </section>
+  <!-- Converter Main Card -->
+  <div class="main-wrapper">
+    <main class="card">
+      <header class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+        </div>
+        <div class="wordmark">
+          <h1>E-book Converter</h1>
+          <span class="tagline">Local & Offline Fixation Engine</span>
+        </div>
+      </header>
 
-    <section id="progress" class="progress hidden">
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <p id="progressLabel">Preparing…</p>
-      <ul id="progressLog"></ul>
-    </section>
-
-    <section id="result" class="result hidden">
-      <p id="resultMsg"></p>
-      <a id="downloadLink" class="download-btn" download>Download converted file</a>
-    </section>
-
-    <section id="errorBox" class="error hidden"></section>
-
-    <footer>
-      <p>
-        MOBI, AZW3, and KFX aren't supported directly — convert to EPUB
-        first with <a href="https://calibre-ebook.com/" target="_blank" rel="noopener">Calibre</a>
-        (free), then drop the EPUB in here.
+      <p class="intro">
+        Drop in an <strong>.epub</strong>, <strong>.pdf</strong>, or <strong>.txt</strong> file. Inkbolt bolds the
+        leading letters of each word to guide your eye fixation and returns the file in the <strong>same
+          format</strong>. EPUB and PDF keep their original layouts, covers, and typography intact.
       </p>
-    </footer>
-  </main>
+
+      <section id="dropzone" class="dropzone">
+        <input type="file" id="fileInput" accept=".epub,.txt,.pdf" hidden />
+        <div class="dropzone-inner">
+          <div class="dropzone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <p><strong>Drag a file here</strong> or click to browse</p>
+          <span class="dropzone-sub">All conversions happen locally in your browser</span>
+          <div class="format-tags">
+            <span class="format-tag">.EPUB</span>
+            <span class="format-tag">.PDF</span>
+            <span class="format-tag">.TXT</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="options">
+        <div class="options-header">
+          <div class="label">
+            <strong>Bold intensity</strong>
+            <span class="sub">Anchor weight per word</span>
+          </div>
+          <div class="ratio-preview" id="ratioPreview"><span class="bold">Read</span>ing</div>
+        </div>
+        <input type="range" id="ratioSlider" min="30" max="70" step="5" value="50" />
+      </section>
+
+      <section id="progress" class="progress hidden">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p id="progressLabel">Preparing…</p>
+        <ul id="progressLog"></ul>
+      </section>
+
+      <section id="result" class="result hidden">
+        <p id="resultMsg"></p>
+        <a id="downloadLink" class="download-btn" download>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download converted file
+        </a>
+      </section>
+
+      <section id="errorBox" class="error hidden"></section>
+
+      <footer class="card-footer">
+        <p style="margin: 0;">
+          MOBI, AZW3, and KFX formats aren't supported directly &mdash; convert to EPUB first with <a
+            href="https://calibre-ebook.com/" target="_blank" rel="noopener">Calibre</a> (free), then drop the EPUB in
+          here.
+        </p>
+      </footer>
+    </main>
+  </div>
 
   <script src="vendor/jszip.min.js"></script>
   <script src="vendor/pdf.min.js"></script>
   <script src="vendor/pdf-lib.min.js"></script>
   <script src="../src/inkbolt-core.js"></script>
   <script src="app.js"></script>
+  <script>
+    (function () {
+      const v = document.querySelector('.bg-video');
+      if (v) {
+        v.defaultMuted = true;
+        v.muted = true;
+        v.playbackRate = 0.55;
+        v.play().catch(function () { });
+      }
+    })();
+  </script>
 </body>
+
 </html>
