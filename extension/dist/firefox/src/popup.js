@@ -7,6 +7,7 @@
   const siteSub = document.getElementById('siteSub');
   const ratioSlider = document.getElementById('ratioSlider');
   const statusMsg = document.getElementById('statusMsg');
+  const headerDot = document.getElementById('headerDot');
 
   let currentHostname = '';
 
@@ -44,19 +45,23 @@
 
     const stored = await getStorage();
     globalToggle.checked = stored.globalEnabled;
+    if (headerDot) {
+      headerDot.classList.toggle('disabled', !stored.globalEnabled);
+    }
     ratioSlider.value = Math.round(stored.ratio * 100);
     updateRatioPreview();
 
     if (!currentHostname) {
       siteLabel.textContent = 'This page';
       siteSub.textContent = 'Not a website tab';
+      siteSub.classList.remove('active-site');
       siteToggle.disabled = true;
     } else {
       siteLabel.textContent = currentHostname;
-      siteSub.textContent = stored.siteDisabled.includes(currentHostname)
-        ? 'Disabled on this site'
-        : 'Active on this site';
-      siteToggle.checked = !stored.siteDisabled.includes(currentHostname);
+      const isSiteActive = !stored.siteDisabled.includes(currentHostname);
+      siteSub.textContent = isSiteActive ? 'Active on this site' : 'Disabled on this site';
+      siteSub.classList.toggle('active-site', isSiteActive);
+      siteToggle.checked = isSiteActive;
     }
   }
 
@@ -70,6 +75,9 @@
 
   globalToggle.addEventListener('change', async () => {
     await setStorage({ globalEnabled: globalToggle.checked });
+    if (headerDot) {
+      headerDot.classList.toggle('disabled', !globalToggle.checked);
+    }
     flash(globalToggle.checked ? 'Enabled everywhere' : 'Disabled everywhere');
   });
 
@@ -80,9 +88,11 @@
     if (siteToggle.checked) {
       set.delete(currentHostname);
       siteSub.textContent = 'Active on this site';
+      siteSub.classList.add('active-site');
     } else {
       set.add(currentHostname);
       siteSub.textContent = 'Disabled on this site';
+      siteSub.classList.remove('active-site');
     }
     await setStorage({ siteDisabled: Array.from(set) });
     flash('Saved');

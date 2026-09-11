@@ -1,62 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Inkbolt</title>
-<link rel="stylesheet" href="popup.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inkbolt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Newsreader:ital,opsz,wght@0,6..72,600;0,6..72,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
   <header>
-    <svg class="logo" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-      <rect width="32" height="32" rx="8" fill="url(#g)" />
-      <defs>
-        <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stop-color="#241a44" />
-          <stop offset="1" stop-color="#150f27" />
-        </linearGradient>
-      </defs>
-      <path d="M15 5 L9 17 L14 17 L12.5 27 L23 13 L17 13 L19 5 Z" fill="#FFC857" />
-    </svg>
-    <div class="wordmark">
-      <h1>Inkbolt</h1>
-      <span class="tagline">Bold words. Faster reading.</span>
+    <div class="brand">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <div class="wordmark">
+        <h1>Inkbolt</h1>
+        <span class="tagline">Bold words. Faster reading.</span>
+      </div>
+    </div>
+    <div class="header-status">
+      <span class="active-dot" id="headerDot" title="Inkbolt is active"></span>
     </div>
   </header>
 
-  <section class="row">
-    <div class="label">
-      <strong>Enabled everywhere</strong>
-      <span class="sub">Master switch for all sites</span>
-    </div>
-    <label class="switch">
-      <input type="checkbox" id="globalToggle" />
-      <span class="slider"></span>
-    </label>
-  </section>
+  <div class="content-panel">
+    <!-- Master switch -->
+    <section class="row">
+      <div class="label">
+        <strong>Enabled everywhere</strong>
+        <span class="sub">Master switch for all sites</span>
+      </div>
+      <label class="switch" title="Toggle Inkbolt everywhere">
+        <input type="checkbox" id="globalToggle" />
+        <span class="slider"></span>
+      </label>
+    </section>
 
-  <section class="row">
-    <div class="label">
-      <strong id="siteLabel">This site</strong>
-      <span class="sub" id="siteSub">—</span>
-    </div>
-    <label class="switch">
-      <input type="checkbox" id="siteToggle" />
-      <span class="slider"></span>
-    </label>
-  </section>
+    <!-- Site switch -->
+    <section class="row">
+      <div class="label">
+        <strong id="siteLabel">This site</strong>
+        <span class="sub" id="siteSub">—</span>
+      </div>
+      <label class="switch" title="Toggle Inkbolt on this site">
+        <input type="checkbox" id="siteToggle" />
+        <span class="slider"></span>
+      </label>
+    </section>
 
-  <section class="slider-block">
-    <div class="label">
-      <strong>Bold intensity</strong>
-      <span class="sub">How much of each word is bolded</span>
-    </div>
-    <input type="range" id="ratioSlider" min="30" max="70" step="5" />
-    <div class="ratio-preview" id="ratioPreview"><span class="bold">Read</span>ing</div>
-  </section>
+    <!-- Fixation Intensity Slider -->
+    <section class="slider-block">
+      <div class="slider-header">
+        <div class="label">
+          <strong>Bold intensity</strong>
+          <span class="sub">Anchor weight per word</span>
+        </div>
+        <div class="ratio-preview" id="ratioPreview"><span class="bold">Read</span>ing</div>
+      </div>
+      <input type="range" id="ratioSlider" min="30" max="70" step="5" />
+      <div class="slider-scale">
+        <span>30% Light</span>
+        <span>50% Balanced</span>
+        <span>70% Strong</span>
+      </div>
+    </section>
 
-  <button id="epubToolBtn" class="epub-btn">Convert an e-book (EPUB / TXT)</button>
+    <!-- E-book Converter Tool Button -->
+    <button id="epubToolBtn" class="epub-btn" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg>
+      Convert E-book (EPUB / PDF)
+    </button>
+  </div>
 
-  <p class="shortcut-hint">⌨️ <kbd>Ctrl+Shift+B</kbd> (<kbd>⌘+Shift+B</kbd> on Mac) toggles Inkbolt anywhere</p>
+  <div class="shortcut-hint">
+    <kbd>Ctrl+Shift+B</kbd> or <kbd>⌘+Shift+B</kbd> toggles Inkbolt
+  </div>
 
   <footer>
     <span id="statusMsg"></span>
