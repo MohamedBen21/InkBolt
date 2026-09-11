@@ -1,164 +1,451 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Inkbolt — Bold words. Faster reading.</title>
-<meta name="description" content="Inkbolt bolds the leading letters of every word on any page, or inside your EPUB/TXT files, to help you read faster and stay focused. No font changes, ever." />
-<link rel="icon" href="icon.svg" type="image/svg+xml" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inkbolt — Bold words. Faster reading.</title>
+  <meta name="description" content="Inkbolt bolds the leading letters of every word to guide your eye fixation. Read articles, web search results, and e-books faster with zero font changes." />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <!-- Ambient Blurry Video Background (Open Book Pages) -->
+  <div class="bg-video-container" aria-hidden="true">
+    <video class="bg-video" id="bg-video" autoplay loop muted playsinline poster="assets/bg-poster.jpg">
+      <source src="assets/book-video.mp4" type="video/mp4" />
+      <source src="assets/bg-video.mp4" type="video/mp4" />
+    </video>
+    <div class="bg-tint"></div>
+  </div>
+
+  <!-- Navigation Bar -->
   <header class="nav">
     <div class="nav-inner">
-      <a href="#" class="brand">
-        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="brand-logo">
-          <rect width="32" height="32" rx="8" fill="url(#g)" />
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#241a44" /><stop offset="1" stop-color="#150f27" />
-            </linearGradient>
-          </defs>
-          <path d="M15 5 L9 17 L14 17 L12.5 27 L23 13 L17 13 L19 5 Z" fill="#FFC857" />
-        </svg>
+      <a href="#" class="brand" aria-label="Inkbolt Home">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </span>
         Inkbolt
       </a>
+
       <nav>
-        <a href="#how">How it works</a>
-        <a href="#ebooks">E-books</a>
+        <a href="#specimen">Reading Demo</a>
+        <a href="#ebooks">E-Books & PDFs</a>
+        <a href="#how">How It Works</a>
         <a href="#faq">FAQ</a>
       </nav>
+
+      <div class="nav-actions">
+        <button class="ambient-toggle" id="ambientToggle" type="button" aria-label="Toggle ambient background video">
+          <span class="ambient-dot" id="ambientDot"></span>
+          <span id="ambientText">Ambient on</span>
+        </button>
+        <a href="epub-tool/index.html" class="btn btn-converter btn-sm">Convert an E-book</a>
+      </div>
     </div>
   </header>
 
   <main>
+    <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Fixation-Guided Reading
+        </div>
         <h1>
-          <span class="ib">Bo<span class="hl">ld</span> wor<span class="hl">ds</span>.</span>
-          <span class="ib">Fa<span class="hl">ster</span> rea<span class="hl">ding</span>.</span>
+          <b>Read</b> faster.<br />
+          <b>Stay</b> focused.
         </h1>
         <p class="hero-sub">
-          Inkbolt bolds the leading letters of every word on any page —
-          your eyes anchor, your brain fills in the rest. No font changes,
-          no layout shifts, no gimmicks.
+          Inkbolt bolds the first few letters of each word. Your eyes anchor on the bold letters, and your brain completes the rest automatically — letting you read articles, search results, and books with greater speed and less fatigue.
         </p>
         <div class="hero-ctas">
-          <a href="#how" class="btn btn-primary">See how it works</a>
-          <a href="epub-tool/index.html" class="btn btn-secondary">Convert an e-book</a>
+          <a href="#specimen" class="btn btn-primary">
+            Try the reading demo
+          </a>
+          <a href="epub-tool/index.html" class="btn btn-converter">
+            Convert an e-book (.epub, .pdf, .txt)
+          </a>
         </div>
-        <p class="hero-note">Free · Open source · Works offline · Not yet on the Chrome/Firefox stores</p>
+        <div class="hero-proof">
+          <div class="proof-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            No font changes or reflow
+          </div>
+          <div class="proof-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            100% Offline & private
+          </div>
+          <div class="proof-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Zero accounts or telemetry
+          </div>
+        </div>
       </div>
 
-      <div class="demo-card">
-        <p class="demo-label">Before</p>
-        <p class="demo-text demo-off">
-          Attention readers, this method is absolutely mind blowing and
-          helps you stay focused while reading online.
-        </p>
-        <p class="demo-label">After</p>
-        <p class="demo-text demo-on">
-          <b>Atten</b>tion <b>read</b>ers, <b>th</b>is <b>meth</b>od <b>i</b>s
-          <b>absol</b>utely <b>mi</b>nd <b>blow</b>ing <b>a</b>nd <b>hel</b>ps
-          <b>y</b>ou <b>st</b>ay <b>foc</b>used <b>wh</b>ile <b>read</b>ing
-          <b>onl</b>ine.
-        </p>
+      <!-- Live Interactive Reading Specimen -->
+      <div class="specimen-card" id="specimen">
+        <div class="specimen-header">
+          <div class="specimen-title">Live Reading Specimen</div>
+          <div class="specimen-toggle active" id="specimenToggle" role="button" tabindex="0" aria-label="Toggle Inkbolt bionic formatting">
+            <span>Inkbolt</span>
+            <div class="toggle-track">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="specimen-tabs" role="tablist">
+          <button class="specimen-tab active" data-sample="book" role="tab">Classic Book</button>
+          <button class="specimen-tab" data-sample="essay" role="tab">Essay</button>
+          <button class="specimen-tab" data-sample="search" role="tab">Web Search</button>
+          <button class="specimen-tab" data-sample="custom" role="tab">Type Your Own</button>
+        </div>
+
+        <div class="specimen-body" id="specimenOutput"></div>
+
+        <div class="specimen-controls">
+          <div class="specimen-slider-group">
+            <label for="fixationSlider">Anchor weight:</label>
+            <input type="range" class="specimen-slider" id="fixationSlider" min="0.3" max="0.7" step="0.1" value="0.5" />
+            <span class="specimen-val" id="fixationVal">50%</span>
+          </div>
+          <div style="color: var(--text-faint); font-size: 12.5px;">
+            Smooth fixation anchor
+          </div>
+        </div>
       </div>
     </section>
 
-    <section id="how" class="features">
-      <div class="section-head">
-        <h2>How it works</h2>
-        <p>Three things, done well, nothing else.</p>
-      </div>
-      <div class="feature-grid">
-        <div class="feature">
-          <div class="feature-icon">01</div>
-          <h3>Bolds, never restyles</h3>
-          <p>Only <code>font-weight</code> changes on the first few letters
-          of each word. Your site's font, size, and layout are untouched —
-          always.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">02</div>
-          <h3>Works everywhere, live</h3>
-          <p>Search results, infinite-scroll feeds, single-page apps — a
-          background watcher catches new content as it loads, no refresh
-          needed.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">03</div>
-          <h3>Tune it, or turn it off</h3>
-          <p>A bold-intensity slider, a global switch, and per-site
-          control — on the sites you want, off everywhere else.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="ebooks" class="ebooks">
-      <div class="ebooks-inner">
-        <div class="ebooks-copy">
-          <h2>Your e-books, too</h2>
+    <!-- E-Books & Document Converter Section -->
+    <section id="ebooks" class="ebooks-section">
+      <div class="ebooks-card">
+        <div class="ebooks-content">
+          <h2>Your E-books, Converted with Care</h2>
           <p>
-            Drop in an <strong>.epub</strong> or <strong>.txt</strong> file
-            and get back a file in the <em>same format</em> — EPUB stays
-            EPUB, TXT stays TXT (using real bold Unicode characters, not
-            markup). Nothing runs on a server; it all happens in your
-            browser.
+            Drop in your digital books and download a version formatted for effortless reading. The converter runs locally in your browser — nothing is uploaded or sent over the internet.
           </p>
-          <a href="epub-tool/index.html" class="btn btn-primary">Open the converter</a>
+          <div class="format-grid">
+            <div class="format-card">
+              <div class="format-badge">EPUB</div>
+              <div class="format-text">
+                <h4>EPUB Novels & Non-Fiction</h4>
+                <p>Preserves chapters, table of contents, cover art, and internal links.</p>
+              </div>
+            </div>
+            <div class="format-card">
+              <div class="format-badge">PDF</div>
+              <div class="format-text">
+                <h4>PDF Documents & Papers</h4>
+                <p>Overlays fixation bolding in place — images, diagrams, and tables never shift.</p>
+              </div>
+            </div>
+            <div class="format-card">
+              <div class="format-badge">TXT</div>
+              <div class="format-text">
+                <h4>Plain Text Files</h4>
+                <p>Uses genuine Unicode bold characters so it displays on any Kindle or e-reader.</p>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 24px;">
+            <a href="epub-tool/index.html" class="btn btn-converter">
+              Open the E-book Converter &rarr;
+            </a>
+          </div>
         </div>
-        <div class="ebooks-visual">
-          <div class="file-chip">📘 book.epub</div>
-          <div class="arrow">→</div>
-          <div class="file-chip file-chip-accent">📘 book-inkbolt.epub</div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #110f0d; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 32px 24px;">
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--text-main);">
+            <span style="padding: 10px 16px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 13px;">
+              great-expectations.epub
+            </span>
+            <span style="color: var(--accent); font-size: 18px;">&rarr;</span>
+            <span style="padding: 10px 16px; background: var(--accent-subtle); border: 1px solid var(--accent-border); border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent);">
+              great-expectations-inkbolt.epub
+            </span>
+          </div>
+          <p style="margin: 0; font-size: 13px; color: var(--text-faint); text-align: center; max-width: 36ch;">
+            Files stay in the identical format. Read them in Apple Books, Kindle, Kobo, or your favorite reading app.
+          </p>
         </div>
       </div>
     </section>
 
-    <section id="faq" class="faq">
-      <div class="section-head">
-        <h2>Questions</h2>
+    <!-- How It Works Section -->
+    <section id="how" class="principles-section">
+      <div class="section-intro">
+        <h2>How Fixation Reading Works</h2>
+        <p>Three simple principles grounded in reading mechanics.</p>
       </div>
+
+      <div class="principles-grid">
+        <div class="principle-card">
+          <div class="principle-num">01 / Mechanic</div>
+          <h3>Eye Fixation Anchoring</h3>
+          <p>
+            When you read, your eyes do not glide continuously. They hop between fixation points (saccades). By bolding the lead letters of words, Inkbolt gives your eye an instant landing spot so your brain can decode the word without scanning every letter.
+          </p>
+        </div>
+
+        <div class="principle-card">
+          <div class="principle-num">02 / Typography</div>
+          <h3>Zero Layout Shift</h3>
+          <p>
+            Inkbolt only changes <code>font-weight</code> on a few letters per word. It never alters your site's font-family, font size, line spacing, or margins. The layout of the webpage or book remains completely untouched.
+          </p>
+        </div>
+
+        <div class="principle-card">
+          <div class="principle-num">03 / Privacy</div>
+          <h3>Entirely Local & Offline</h3>
+          <p>
+            Everything happens inside your browser. No text is analyzed remotely, no files are transmitted, and no account is required. It works equally well when your machine is completely offline.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Web Search & Everyday Reading -->
+    <section class="search-section">
+      <div class="search-box-card">
+        <div>
+          <h2>Skim Search Results & Articles Fast</h2>
+          <p>
+            When searching Google, DuckDuckGo, or reading long articles and technical documentation, your eye naturally glides past filler text straight to the core concepts.
+          </p>
+          <a href="#specimen" class="btn btn-secondary">
+            Test search text in demo
+          </a>
+        </div>
+
+        <div class="search-specimen">
+          <div class="search-header-mock">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>web search: history of print typography</span>
+          </div>
+          <div class="search-result-mock">
+            <div class="mock-title">The Ev<b>ol</b>ution of Pr<b>in</b>t and Re<b>ad</b>ing Me<b>ch</b>anics</div>
+            <p style="margin: 0;">
+              Mo<b>ve</b>able ty<b>pe</b> cha<b>ng</b>ed ho<b>w</b> hu<b>ma</b>n be<b>in</b>gs sh<b>ar</b>e kno<b>wl</b>edge. Mo<b>de</b>rn re<b>ad</b>ers pr<b>oc</b>ess th<b>ou</b>sands of wo<b>rd</b>s ea<b>ch</b> da<b>y</b> th<b>ro</b>ugh di<b>gi</b>tal sc<b>re</b>ens.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq-section">
+      <div class="section-intro">
+        <h2>Questions & Answers</h2>
+      </div>
+
       <div class="faq-list">
-        <details>
-          <summary>Does this change my site's fonts?</summary>
-          <p>No. Inkbolt only adjusts <code>font-weight</code> on part of
-          each word via an inline style — font-family, size, and line
-          height are never touched.</p>
+        <details open>
+          <summary>Does Inkbolt alter my fonts or page layouts?</summary>
+          <p>
+            Never. Inkbolt strictly bumps the <code>font-weight</code> on the first few letters of each word using an inline style. The font-family, font size, margins, and page structure are left completely untouched.
+          </p>
         </details>
         <details>
           <summary>Is this the "Bionic Reading" app?</summary>
-          <p>No — Inkbolt is an independent implementation of a similar
-          fixation-guided reading idea. "Bionic Reading" is a trademark of
-          a different company; Inkbolt is its own product, unaffiliated.</p>
+          <p>
+            No. Inkbolt is an independent open-source implementation of fixation-guided reading. "Bionic Reading" is an active registered trademark of Bionic Reading GmbH; Inkbolt is its own independent product, unaffiliated.
+          </p>
         </details>
         <details>
-          <summary>What e-book formats are supported?</summary>
-          <p>EPUB, TXT, and PDF directly. All three keep their original
-          layout — for PDF, that means the original tables, images, and
-          colors stay exactly as they were; only the bolded portions of
-          each word are drawn on top, in place. For MOBI, AZW3, or KFX,
-          convert to
-          EPUB first with <a href="https://calibre-ebook.com/" target="_blank" rel="noopener">Calibre</a>
-          (free), then use the converter.</p>
+          <summary>Which e-book formats can I convert?</summary>
+          <p>
+            EPUB, PDF, and TXT files directly. EPUB stays an authentic EPUB with chapters and cover art intact. PDF maintains the original layouts and diagrams with bold overlays drawn in place. TXT uses real Unicode bold characters.
+          </p>
         </details>
         <details>
-          <summary>Does it send my browsing or my files anywhere?</summary>
-          <p>No network calls are made with your page content or your
-          files — everything runs locally in your browser.</p>
+          <summary>Does it send my text or documents anywhere?</summary>
+          <p>
+            No. Everything runs strictly inside your local browser runtime. No server requests, no tracking, and no external dependencies.
+          </p>
         </details>
       </div>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="site-footer">
-    <p>Inkbolt — bold words, faster reading. · <a href="privacy.html">Privacy Policy</a></p>
+    <div class="footer-inner">
+      <div>
+        <strong>Inkbolt</strong> — Bold words. Faster reading.
+      </div>
+      <div>
+        <a href="privacy.html">Privacy Policy</a> &nbsp;&middot;&nbsp;
+        <a href="epub-tool/index.html">E-book Converter</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/MohamedBen21/InkBolt" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
   </footer>
 
+  <!-- Scripts -->
+  <script src="src/inkbolt-core.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // 1. Background Video Setup & Slow Motion
+      const video = document.getElementById('bg-video');
+      const ambientToggle = document.getElementById('ambientToggle');
+      const ambientDot = document.getElementById('ambientDot');
+      const ambientText = document.getElementById('ambientText');
+
+      if (video) {
+        video.defaultMuted = true;
+        video.muted = true;
+        video.volume = 0;
+        video.playbackRate = 0.55;
+
+        const startPlayback = function () {
+          video.play().catch(function () {
+            // Browser policy blocked zero-interaction autoplay
+          });
+        };
+
+        startPlayback();
+        window.addEventListener('load', startPlayback);
+        ['click', 'scroll', 'touchstart', 'mousemove'].forEach(function (evt) {
+          window.addEventListener(evt, startPlayback, { once: true, passive: true });
+        });
+
+        if (ambientToggle) {
+          ambientToggle.addEventListener('click', function () {
+            if (video.paused) {
+              video.play();
+              ambientDot.classList.remove('paused');
+              ambientText.textContent = 'Ambient on';
+            } else {
+              video.pause();
+              ambientDot.classList.add('paused');
+              ambientText.textContent = 'Ambient paused';
+            }
+          });
+        }
+      }
+
+      // 2. Reading Specimen Data
+      const SAMPLES = {
+        book: "In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since. Whenever you feel like criticizing anyone, he told me, just remember that all the people in this world haven't had the advantages that you've had.",
+        essay: "The human eye does not glide smoothly across text during reading. Instead, it moves in rapid jumps called saccades, pausing briefly at fixation points to recognize words before leaping forward to the next cluster.",
+        search: "Attention web searchers: fixation-guided reading allows your brain to anchor on key terms and skim search engine results, articles, and long research papers up to twice as fast without losing context.",
+        custom: "Click here and start typing to test Inkbolt on your own sentences in real time."
+      };
+
+      let currentSample = 'book';
+      let isInkboltActive = true;
+      let ratio = 0.5;
+
+      const specimenOutput = document.getElementById('specimenOutput');
+      const specimenToggle = document.getElementById('specimenToggle');
+      const fixationSlider = document.getElementById('fixationSlider');
+      const fixationVal = document.getElementById('fixationVal');
+      const tabs = document.querySelectorAll('.specimen-tab');
+
+      function renderSpecimen() {
+        if (!specimenOutput) return;
+
+        let rawText = SAMPLES[currentSample];
+        if (currentSample === 'custom' && specimenOutput.isContentEditable) {
+          rawText = specimenOutput.innerText;
+          SAMPLES.custom = rawText;
+        }
+
+        specimenOutput.innerHTML = '';
+        if (currentSample === 'essay' || currentSample === 'search') {
+          specimenOutput.classList.add('font-sans');
+        } else {
+          specimenOutput.classList.remove('font-sans');
+        }
+
+        if (isInkboltActive && window.InkboltCore && window.InkboltCore.buildBionicFragment) {
+          const frag = window.InkboltCore.buildBionicFragment(rawText, {
+            ratio: ratio,
+            boldWeight: '700'
+          });
+          specimenOutput.appendChild(frag);
+        } else {
+          specimenOutput.textContent = rawText;
+        }
+      }
+
+      // Toggle Inkbolt
+      if (specimenToggle) {
+        specimenToggle.addEventListener('click', function () {
+          isInkboltActive = !isInkboltActive;
+          specimenToggle.classList.toggle('active', isInkboltActive);
+          renderSpecimen();
+        });
+        specimenToggle.addEventListener('keydown', function (e) {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            specimenToggle.click();
+          }
+        });
+      }
+
+      // Slider
+      if (fixationSlider) {
+        fixationSlider.addEventListener('input', function (e) {
+          ratio = parseFloat(e.target.value);
+          if (fixationVal) {
+            fixationVal.textContent = Math.round(ratio * 100) + '%';
+          }
+          if (isInkboltActive) {
+            renderSpecimen();
+          }
+        });
+      }
+
+      // Tabs
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentSample = tab.dataset.sample;
+
+          if (currentSample === 'custom') {
+            specimenOutput.contentEditable = 'true';
+            specimenOutput.setAttribute('spellcheck', 'false');
+            specimenOutput.focus();
+          } else {
+            specimenOutput.contentEditable = 'false';
+          }
+
+          renderSpecimen();
+        });
+      });
+
+      // Custom edit
+      if (specimenOutput) {
+        specimenOutput.addEventListener('blur', function () {
+          if (currentSample === 'custom') {
+            SAMPLES.custom = specimenOutput.innerText;
+            renderSpecimen();
+          }
+        });
+      }
+
+      // Initial render
+      renderSpecimen();
+    })();
+  </script>
 </body>
 </html>
