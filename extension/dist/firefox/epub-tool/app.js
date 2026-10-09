@@ -52,7 +52,12 @@
     const ratio = ratioSlider.value / 100;
     const word = 'Reading';
     const boldLen = Math.max(1, Math.round(word.length * ratio));
-    ratioPreview.innerHTML = `<span class="bold">${word.slice(0, boldLen)}</span>${word.slice(boldLen)}`;
+    ratioPreview.textContent = '';
+    const boldSpan = document.createElement('span');
+    boldSpan.className = 'bold';
+    boldSpan.textContent = word.slice(0, boldLen);
+    ratioPreview.appendChild(boldSpan);
+    ratioPreview.appendChild(document.createTextNode(word.slice(boldLen)));
   }
   ratioSlider.addEventListener('input', updateRatioPreview);
   updateRatioPreview();
@@ -61,7 +66,7 @@
     progressSection.classList.add('hidden');
     resultSection.classList.add('hidden');
     errorBox.classList.add('hidden');
-    progressLog.innerHTML = '';
+    progressLog.textContent = '';
     progressFill.style.width = '0%';
   }
 

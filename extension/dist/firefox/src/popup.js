@@ -69,8 +69,14 @@
     const ratio = ratioSlider.value / 100;
     const word = 'Reading';
     const boldLen = Math.max(1, Math.round(word.length * ratio));
-    document.getElementById('ratioPreview').innerHTML =
-      `<span class="bold">${word.slice(0, boldLen)}</span>${word.slice(boldLen)}`;
+    const preview = document.getElementById('ratioPreview');
+    if (!preview) return;
+    preview.textContent = '';
+    const boldSpan = document.createElement('span');
+    boldSpan.className = 'bold';
+    boldSpan.textContent = word.slice(0, boldLen);
+    preview.appendChild(boldSpan);
+    preview.appendChild(document.createTextNode(word.slice(boldLen)));
   }
 
   globalToggle.addEventListener('change', async () => {
