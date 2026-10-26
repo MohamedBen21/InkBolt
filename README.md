@@ -1,176 +1,202 @@
+<div align="center">
+
+<img src="assets/icon.svg" width="96" alt="Inkbolt logo">
+
 # Inkbolt
 
-**Bold words. Faster reading.**
+**Bold words. Faster reading. Deeper focus.**  
+Read websites, articles, and e-books up to 2× faster with bionic fixation anchors — 100% offline & private.
 
-Inkbolt bolds the leading letters of every word — on any web page, or
-inside your EPUB/TXT files — so your eyes anchor on fewer fixation points
-and your brain fills in the rest. No font changes, no layout shifts.
+[**Chrome Web Store**](https://chromewebstore.google.com/detail/inkbolt/jokidopffoajcbbomjphgbdmfbpeflen) • [**Firefox Add-ons**](https://addons.mozilla.org/firefox/addon/inkbolt-read-faster/) • [**Features**](#features) • [**E-Book Converter**](#the-e-book--document-converter) • [**Install**](#install--quick-start) • [**Build from Source**](#build-from-source)
 
-Independent product, independent identity — unrelated to any other project.
-See `BRAND.md` for the full identity system (name rationale, palette,
-logo, typography).
+<br>
 
-## What's in this repo
+![Inkbolt Hero Preview](docs/hero.png)
 
-```
+</div>
+
+> **How it works:** Inkbolt bolds the leading letters of every word across the web and inside your e-books. Your eyes latch onto anchor fixation points (saccades), your brain effortlessly fills in the rest, and you glide through long-form reading with less eye fatigue and deeper comprehension. No accounts, no cloud servers, zero telemetry — everything runs 100% locally in your browser memory.
+
+<div align="center">
+
+![Inkbolt demo: live bionic fixation reading in action](docs/demo.gif)
+
+</div>
+
+---
+
+## Why Inkbolt
+
+- **Zero Layout Shifts.** Only `font-weight` changes — ever. Font-family, font-size, line-height, margins, and page styling remain untouched.
+- **Works on Dynamic Live Content.** Infinite-scroll feeds, SPAs, and search engines — Inkbolt formats newly loaded text in real time without requiring a refresh.
+- **Built-in Offline E-Book Converter.** Transform `.epub`, `.pdf`, and `.txt` files directly in your browser with layouts, chapters, images, and covers 100% intact.
+- **Private by Design.** Zero network calls, zero tracking, no telemetry. Your files, documents, and settings never leave your machine.
+- **E-Reader Ready.** Sideload converted EPUBs straight onto your Kindle (via *Send to Kindle*), Kobo, Apple Books, or reMarkable tablet.
+- **Icon-Font Protection.** Automatically detects and skips icon fonts (Font Awesome, Material Icons, Feather, etc.) so web icons never turn into garbled text.
+
+---
+
+## Features
+
+### The Browser Extension
+A clean, lightweight extension for Chromium (Chrome, Edge, Brave, Opera) and Firefox.
+- **Master switch:** Toggle Inkbolt globally on or off with a single click.
+- **Per-site toggle:** Disable Inkbolt on specific domains (e.g. code sandboxes or spreadsheets) while keeping it active everywhere else.
+- **Bold Intensity Slider:** Tune fixation anchor weight from **30% (Subtle)** to **50% (Balanced)** up to **70% (Deep)** with live preview.
+- **Global Hotkey:** Press <kbd>Ctrl+Shift+B</kbd> (<kbd>⌘+Shift+B</kbd> on macOS) to instantly toggle reading mode on any page.
+
+### The E-Book & Document Converter
+Accessible directly from the extension popup or as a standalone web tool.
+- **EPUB Novels & Non-Fiction (`.epub`):** Parses chapters with JSZip, bolds text nodes in-place, and re-packages a standard EPUB. Covers, metadata, embedded stylesheets, and illustrations stay pixel-perfect.
+- **PDF Documents (`.pdf`):** In-place text overlay via `pdf-lib` and `pdf.js`. Preserves original tables, diagrams, headers, and vector graphics.
+- **Plain Text Files (`.txt`):** Generates true Unicode Mathematical Bold characters so the output remains a genuine, portable `.txt` file.
+
+---
+
+## Screenshots
+
+| Browser Extension Popup | Offline E-Book Converter Tool |
+|:---:|:---:|
+| <img src="docs/popup.png" width="340" alt="Inkbolt extension popup"> | <img src="docs/converter.png" width="500" alt="Inkbolt e-book converter"> |
+
+<br>
+
+<div align="center">
+
+### Built for complete privacy and e-reader compatibility
+
+<img src="docs/features.png" width="820" alt="Inkbolt 3 core features">
+
+</div>
+
+---
+
+## Supported Formats
+
+| Format | Input | Output | Highlights |
+|---|---|---|---|
+| **Web Pages** | HTML DOM | Formatted DOM | Real-time DOM transform, MutationObserver, icon-font protection |
+| **E-Books** | `.epub` | `.epub` | Preserves cover art, CSS stylesheets, tables, and chapter structure |
+| **Documents** | `.pdf` | `.pdf` | Exact page layout preserved; bold anchors rendered in-place |
+| **Plain Text** | `.txt` | `.txt` | Uses genuine Unicode bold characters without adding markup |
+| **E-Readers** | Kindle, Kobo, Boox | `.epub` | Compatible with Amazon Send-to-Kindle, Apple Books, and Kobo |
+
+---
+
+## Install & Quick Start
+
+### 1. Browser Extensions
+
+- **Chrome / Brave / Edge:** Install directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/inkbolt/jokidopffoajcbbomjphgbdmfbpeflen).
+- **Firefox:** Install directly from [Firefox Add-ons (AMO)](https://addons.mozilla.org/firefox/addon/inkbolt-read-faster/).
+
+### 2. Manual / Developer Installation
+
+#### Chrome, Brave & Chromium-based browsers:
+1. Open `chrome://extensions/` in your browser.
+2. Enable **Developer mode** in the top-right corner.
+3. Click **Load unpacked** and select the [`extension/dist/chrome`](extension/dist/chrome) directory.
+
+#### Firefox:
+1. Open `about:debugging#/runtime/this-firefox` in Firefox.
+2. Click **Load Temporary Add-on...**.
+3. Select the [`extension/dist/firefox/manifest.json`](extension/dist/firefox/manifest.json) file.
+
+### 3. Standalone E-Book Converter (No installation required)
+Open [`site/epub-tool/index.html`](site/epub-tool/index.html) or [`extension/epub-tool/index.html`](extension/epub-tool/index.html) directly in any modern browser to convert files offline.
+
+---
+
+## Keyboard Shortcuts
+
+| Shortcut | Platform | Action |
+|---|---|---|
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> | Windows / Linux | Toggle Inkbolt reading mode on/off |
+| <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> | macOS | Toggle Inkbolt reading mode on/off |
+
+---
+
+## Project Structure
+
+```text
 inkbolt/
-  extension/          <- Chrome + Firefox browser extension
-    src/
-      inkbolt-core.js   <- the transform engine (shared by everything below)
-      content.js        <- page-wide DOM application + live-content watcher
-      background.js
-      popup.html/js/css
-    epub-tool/          <- bundled e-book converter (also standalone-capable)
-      index.html
-      app.js
-      style.css
-      vendor/
-        jszip.min.js       <- vendored, zero network dependency
-        pdf.min.js         <- pdf.js, for reading PDFs + rendering pages
-        pdf.worker.min.js
-        pdf-lib.min.js     <- for editing/writing PDFs in place
-        standard_fonts/    <- required by pdf.js to render non-embedded
-                              standard fonts (Helvetica, etc.) to canvas
-    manifest.chrome.json
-    manifest.firefox.json
-    build.sh             <- assembles dist/chrome, dist/firefox, AND the
-                              upload-ready dist/inkbolt-{chrome,firefox}-vX.Y.Z.zip
-    icons/
-  site/                <- marketing/info landing page (static, standalone)
-    index.html
-    privacy.html
-    style.css
-    vercel.json          <- one-command deploy: `vercel --prod` from site/
-    netlify.toml          <- one-command deploy: `netlify deploy --prod`
-  sync-site-assets.sh  <- copies the e-book converter + core engine + logo
-                            into site/ so it deploys as a self-contained
-                            folder (run before any Vercel/Netlify deploy;
-                            GitHub Pages runs it automatically)
-  .github/workflows/
-    ci.yml                <- syntax-checks + builds the extension on every push
-    deploy-site.yml        <- auto-deploys site/ to GitHub Pages on push
-  assets/
-    icon.svg             <- master logo source
-    social-preview.png   <- GitHub repo social card (1280x640)
-    store/
-      screenshot-1280x800.png
-      promo-small-440x280.png
-      promo-marquee-1400x560.png
-  BRAND.md             <- full identity system
-  PRIVACY.md           <- privacy policy (also hosted at site/privacy.html)
-  STORE_LISTING.md     <- Chrome Web Store / AMO listing copy
-  DEPLOY.md            <- exact remaining steps: hosting + store submission
-  README.md            <- this file
+├── extension/             # Browser extension source & builds
+│   ├── src/               # Extension logic (content script, background, popup)
+│   │   ├── inkbolt-core.js# Core bionic fixation transform engine
+│   │   ├── content.js     # Live page text watcher & DOM transformer
+│   │   ├── popup.html     # Popup interface
+│   │   └── popup.js       # Popup settings & storage controller
+│   ├── epub-tool/         # Offline E-book converter application
+│   │   ├── index.html     # Tool UI
+│   │   ├── app.js         # EPUB / PDF / TXT processing logic
+│   │   └── vendor/        # Vendored offline libraries (JSZip, PDF.js, pdf-lib)
+│   ├── dist/              # Ready-to-load distribution packages
+│   │   ├── chrome/        # Unpacked Chrome / Chromium extension
+│   │   └── firefox/       # Unpacked Firefox extension
+│   └── build.sh           # Extension packaging script
+├── site/                  # Standalone marketing site & online tool
+│   ├── index.html         # Marketing landing page with live specimen
+│   ├── privacy.html       # Privacy policy page
+│   └── epub-tool/         # Web-hosted e-book converter
+├── docs/                  # Screenshots, animations & visual assets
+└── sync-site-assets.sh    # Asset synchronization script
 ```
 
-## Try it right now
+---
 
-**Chrome / Edge / Brave:**
-1. `chrome://extensions` → enable Developer mode → "Load unpacked"
-2. Select `extension/dist/chrome`
+## Build from Source
 
-**Firefox:**
-1. `about:debugging#/runtime/this-firefox` → "Load Temporary Add-on"
-2. Pick `manifest.json` inside `extension/dist/firefox`
+### Prerequisites
+- Python 3.8+ or Bash
+- Any modern web browser
 
-**E-book converter (standalone, no install):**
-Open `extension/epub-tool/index.html` directly in a browser. It's also
-reachable from inside the extension's popup via the "Convert an e-book"
-button.
+### Building Distribution Packages
+To rebuild the extension packages and submission archives:
+```bash
+# On Linux / macOS:
+./extension/build.sh
 
-**Marketing site (standalone):**
-Open `site/index.html` directly, or host the `site/` folder anywhere
-static (Vercel, GitHub Pages, Netlify).
+# Or using Python (cross-platform / Windows):
+python -c "
+import zipfile, os, json
+for target in ['chrome', 'firefox']:
+    v = json.load(open(f'extension/manifest.{target}.json'))['version']
+    out = f'extension/dist/inkbolt-{target}-v{v}.zip'
+    src = f'extension/dist/{target}'
+    with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
+        for r, d, fs in os.walk(src):
+            for f in fs:
+                if not f.startswith('.'):
+                    z.write(os.path.join(r, f), os.path.relpath(os.path.join(r, f), src))
+    print(f'Built {out}')
+"
+```
 
-If you edit anything under `extension/src/` or `extension/epub-tool/`, run
-`extension/build.sh` again before reloading the unpacked extension.
+The script produces:
+- `extension/dist/chrome/` — load unpacked in Chromium browsers.
+- `extension/dist/firefox/` — load temporary add-on in Firefox.
+- `extension/dist/inkbolt-chrome-v1.0.0.zip` — Chrome Web Store submission package.
+- `extension/dist/inkbolt-firefox-v1.0.0.zip` — Firefox AMO submission package.
 
-## Design principles
+---
 
-- **Only `font-weight` ever changes.** Font-family, size, line-height —
-  untouched, always, on every surface (live pages, EPUB, TXT).
-- **One engine, no forks.** `inkbolt-core.js` is framework-agnostic (DOM
-  operations only) and is the single source of truth the content script,
-  the EPUB path, and the TXT path all call into.
-- **TXT stays TXT via real Unicode bold.** No markup exists in plain
-  text, so bolding uses actual Unicode Mathematical Bold characters
-  (distinct code points, not styling) — the file stays genuinely plain
-  text.
-- **Same format in, same format out — including PDF's actual layout.**
-  `.epub` → `.epub`, `.txt` → `.txt`, `.pdf` → `.pdf`, all keeping their
-  original layout, fonts, tables, images, and colors. The PDF path loads
-  the *original* file via pdf-lib (not a fresh blank document) and draws
-  bold-prefix text directly on top of the existing content, in place —
-  it never rebuilds pages from scratch. To do this correctly even on
-  colored backgrounds (table headers, logos, etc.), each page is rendered
-  once to an offscreen canvas so the real background and ink color behind
-  every bold span can be sampled and matched (using a median over many
-  edge pixels, not just 4 corners — a single stray pixel on a diacritic
-  or antialiased edge was enough to skew a small average toward a visible
-  gray box). Word positions are found by scanning the rendered pixels for
-  actual ink columns rather than trusting font-metric estimates: real
-  documents essentially never use one of the 14 standard PDF fonts we can
-  embed for measurement (this one uses "Outfit-Bold" and "Bitter-Regular"),
-  and metric estimates drift increasingly across a long string when the
-  assumed and actual fonts have different relative letter widths — pixel
-  detection is measured from what's actually rendered, so it stays
-  accurate regardless of the real font. Text already set in a bold font
-  (headings, typically) is left untouched entirely — there's no
-  meaningful weight contrast left to add, and it's the one case where a
-  substitute bold typeface's shape can visibly differ from the original at
-  a glance. Font extraction (reusing the document's own embedded font
-  instead of a substitute) was evaluated and rejected: PDF-embedded
-  subsetted fonts commonly omit the `cmap` table entirely, since the PDF's
-  own CID encoding addresses glyphs directly — reusing them would mean
-  bypassing standard text-shaping APIs for raw glyph-ID manipulation,
-  which is a real, standard technique in dedicated PDF-editing libraries
-  but is a poor fit for "simple and robust" here. A substitute standard
-  font is also what real-world PDF annotation/highlighting tools
-  typically use for overlay content, for the same reliability reason.
-  Scanned/image-only pages are detected and left completely untouched —
-  no edits, no notice drawn on them.
-- **Zero network dependency where it matters.** JSZip, pdf.js, pdf-lib,
-  and pdf.js's standard font data are all vendored locally inside
-  `extension/epub-tool/vendor/`, both because a packaged extension page's
-  CSP won't allow remote scripts by default, and because it means the
-  whole tool works offline.
+## Privacy Policy
 
-## Roadmap status
+Inkbolt is built on a strict privacy-first foundation:
+- **Zero data collection:** Inkbolt does not collect, log, or track user data or reading history.
+- **100% Client-side:** All document conversions and web text styling take place purely in local memory.
+- **No external servers:** No telemetry, analytics, or remote API calls.
+- See [`PRIVACY.md`](PRIVACY.md) or the online [Privacy Policy](site/privacy.html) for full details.
 
-- ✅ Core transform engine, page-wide application, live-content watcher
-  (MutationObserver), settings (global/per-site/intensity), toggle-off
-  revert — all in the extension
-- ✅ E-book converter: EPUB → EPUB, TXT → TXT, and PDF → PDF with the
-  original layout/tables/images fully preserved (see design principles
-  above), bundled into the extension and reachable from the popup
-- ✅ Brand identity: name, logo, palette, applied across extension, popup,
-  e-book tool, and a marketing site
-- ✅ Icon-font protection: detects and skips Font Awesome/Material Icons/etc.
-  so ligatures never get broken into garbled fallback-font text
-- ✅ Keyboard shortcut (Ctrl+Shift+B / Cmd+Shift+B) to toggle globally
-- ✅ Store submission prep: privacy policy (`PRIVACY.md` + hosted
-  `site/privacy.html`), listing copy (`STORE_LISTING.md`), and required
-  promotional images (`assets/store/`)
-- ✅ Deployment prep: one-click hosting configs for the marketing site
-  (Vercel, Netlify, GitHub Pages via Actions), a CI workflow that
-  syntax-checks and builds the extension on every push, and `build.sh`
-  now auto-generates the actual upload-ready submission zips (with
-  `manifest.json` correctly at the zip root) named after the version in
-  the manifest — see `DEPLOY.md` for the exact remaining steps
-- ⏭ Next up (needs your accounts/payment — see `DEPLOY.md` for the exact
-  steps): actually run the deploy (`vercel --prod`, `netlify deploy
-  --prod`, or push to trigger the GitHub Pages workflow), swap the
-  placeholder privacy-policy URL in `STORE_LISTING.md` for the real one,
-  then submit `extension/dist/inkbolt-chrome-v1.0.0.zip` to the Chrome
-  Web Store ($5 one-time fee) and `extension/dist/inkbolt-firefox-v1.0.0.zip`
-  to Firefox AMO (free)
+---
 
-## Testing notes
+## Author
 
-Every change to the transform engine has been exercised end-to-end with a
-jsdom harness (not just written and assumed correct) — including a real
-bug caught and fixed along the way: XHTML-parsed documents keep lowercase
-`tagName` (unlike live browser HTML DOM, which is always uppercase), so
-the original skip-list silently missed `<pre>`/`<script>` inside EPUB
-files and was bolding code. Fixed by normalizing case before comparison in
-both the EPUB tool and, defensively, in the content script.
+Made by **Mohamed Benatallah** ([@MohamedBen21](https://github.com/MohamedBen21)).
+
+---
+
+## License
+
+Inkbolt is open-source software licensed under the [MIT License](LICENSE).
+Vendored third-party libraries (`jszip`, `pdf.js`, `pdf-lib`) are released under their respective MIT/Apache licenses.
