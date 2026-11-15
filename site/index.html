@@ -13,7 +13,7 @@
 </head>
 <body>
 
-  <!-- Ambient Blurry Video Background (Open Book Pages) -->
+
   <div class="bg-video-container" aria-hidden="true">
     <video class="bg-video" id="bg-video" autoplay loop muted playsinline poster="assets/bg-poster.jpg">
       <source src="assets/book-video.mp4" type="video/mp4" />
@@ -107,6 +107,7 @@
 
         <div class="specimen-tabs" role="tablist">
           <button class="specimen-tab active" data-sample="book" role="tab">Classic Book</button>
+          <button class="specimen-tab" data-sample="arabic" role="tab">العربية (Arabic)</button>
           <button class="specimen-tab" data-sample="essay" role="tab">Essay</button>
           <button class="specimen-tab" data-sample="search" role="tab">Web Search</button>
           <button class="specimen-tab" data-sample="custom" role="tab">Type Your Own</button>
@@ -344,6 +345,7 @@
       // 2. Reading Specimen Data
       const SAMPLES = {
         book: "In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since. Whenever you feel like criticizing anyone, he told me, just remember that all the people in this world haven't had the advantages that you've had.",
+        arabic: "القراءة البايونية باللغة العربية تساعد العين على التركيز وسرعة الاستيعاب عبر تثبيت النظر على الحروف الأولى من كل كلمة، مع الحفاظ الكامل على ترابط وانسيابية الخط العربي الأصيل دون أي تقطيع للكلمات.",
         essay: "The human eye does not glide smoothly across text during reading. Instead, it moves in rapid jumps called saccades, pausing briefly at fixation points to recognize words before leaping forward to the next cluster.",
         search: "Attention web searchers: fixation-guided reading allows your brain to anchor on key terms and skim search engine results, articles, and long research papers up to twice as fast without losing context.",
         custom: "Click here and start typing to test Inkbolt on your own sentences in real time."
@@ -369,6 +371,18 @@
         }
 
         specimenOutput.innerHTML = '';
+        if (currentSample === 'arabic') {
+          specimenOutput.setAttribute('dir', 'rtl');
+          specimenOutput.style.textAlign = 'right';
+          specimenOutput.style.fontSize = '21px';
+          specimenOutput.style.lineHeight = '1.9';
+        } else {
+          specimenOutput.removeAttribute('dir');
+          specimenOutput.style.textAlign = '';
+          specimenOutput.style.fontSize = '';
+          specimenOutput.style.lineHeight = '';
+        }
+
         if (currentSample === 'essay' || currentSample === 'search') {
           specimenOutput.classList.add('font-sans');
         } else {

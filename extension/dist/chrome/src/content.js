@@ -1,18 +1,3 @@
-/**
- * content.js
- * Injected on every page. Walks text nodes, applies Inkbolt's bold-prefix
- * transform via InkboltCore, and reverses it cleanly on toggle-off.
- *
- * Design notes:
- * - We wrap each processed text node in a <span data-inkbolt-wrap="1">
- *   and stash the ORIGINAL text on the node itself (dataset.original)
- *   so revert is exact and lossless.
- * - We never process: script, style, noscript, textarea, input,
- *   [contenteditable], code, pre, svg, and anything already wrapped.
- * - MutationObserver is debounced and processing is chunked with
- *   requestIdleCallback so we don't jank scrolling / SPA rendering.
- */
-
 (function () {
   'use strict';
 
@@ -23,12 +8,6 @@
 
   const WRAP_ATTR = 'data-inkbolt-wrap';
 
-  // Class-name fragments used by common icon fonts. Text inside these
-  // elements isn't prose — it's a ligature name (e.g. "home", "search")
-  // that a special font substitutes for an icon glyph. Splitting that
-  // text across multiple <span> elements (some bold, some not) breaks
-  // the ligature, and the browser falls back to a plain font showing the
-  // literal letters — which looks exactly like "the font changed".
   const ICON_CLASS_HINTS = [
     'material-icons', 'material-symbols', 'fa-', ' fa ', 'fas ', 'far ',
     'fal ', 'fab ', 'font-awesome', 'glyphicon', 'ion-', 'iconify',
@@ -42,9 +21,6 @@
     return ICON_CLASS_HINTS.some((hint) => cls.includes(hint));
   }
 
-  // Extra safety net for icon fonts that don't use a recognizable class
-  // name: check the actually-computed font-family. Only meaningful on a
-  // live, rendered page (not available for detached/parsed documents).
   const ICON_FONT_FAMILY_HINTS = [
     'material icons', 'material symbols', 'font awesome', 'fontawesome',
     'glyphicons', 'ionicons', 'icomoon', 'dashicons', 'feather',
@@ -64,14 +40,12 @@
 
   let settings = {
     globalEnabled: true,
-    siteDisabled: [], // hostnames where the extension is off
+    siteDisabled: [],
     ratio: 0.5,
   };
 
   let enabledOnThisPage = false;
   let observer = null;
-  let idleQueue = [];
-  let idleScheduled = false;
 
   function hostname() {
     try { return location.hostname; } catch (e) { return ''; }
@@ -108,14 +82,20 @@
   }
 
   function wrapTextNode(textNode) {
-    const original = textNode.nodeValue;
-    const wrapper = document.createElement('span');
-    wrapper.setAttribute(WRAP_ATTR, '1');
-    wrapper.dataset.original = original;
-    wrapper.appendChild(
-      window.InkboltCore.buildBionicFragment(original, { ratio: settings.ratio })
-    );
-    textNode.parentNode.replaceChild(wrapper, textNode);
+    try {
+      if (!textNode || !textNode.parentNode) return;
+      const original = textNode.nodeValue;
+      if (!original || !original.trim()) return;
+      const wrapper = document.createElement('span');
+      wrapper.setAttribute(WRAP_ATTR, '1');
+      wrapper.dataset.original = original;
+      wrapper.appendChild(
+        window.InkboltCore.buildBionicFragment(original, { ratio: settings.ratio })
+      );
+      if (textNode.parentNode) {
+        textNode.parentNode.replaceChild(wrapper, textNode);
+      }
+    } catch (e) {}
   }
 
   function processChunk(nodes, i) {
@@ -123,7 +103,6 @@
     const end = Math.min(i + CHUNK, nodes.length);
     for (let j = i; j < end; j++) {
       const node = nodes[j];
-      // Node may have been detached by the time we get to it (dynamic pages)
       if (node.parentNode) wrapTextNode(node);
     }
     if (end < nodes.length) {
@@ -206,7 +185,6 @@
   }
 
   function reapplyWithNewRatio() {
-    // Simplest correct approach: revert then re-apply with new settings.
     if (!enabledOnThisPage) return;
     revertAll();
     applyToRoot(document.body);
@@ -243,7 +221,6 @@
     if (ratioChanged) reapplyWithNewRatio();
   });
 
-  // Allow the popup to ask for the current page's status directly.
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg && msg.type === 'INKBOLT_GET_STATUS') {
       sendResponse({

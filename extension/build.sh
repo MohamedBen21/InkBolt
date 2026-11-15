@@ -1,9 +1,3 @@
-#!/usr/bin/env bash
-# Assembles dist/chrome and dist/firefox, each a load-ready extension folder,
-# plus dist/inkbolt-chrome-vX.Y.Z.zip and dist/inkbolt-firefox-vX.Y.Z.zip —
-# the actual files Chrome Web Store / Firefox AMO submission forms want
-# (a zip of the folder's CONTENTS, with manifest.json at the zip root —
-# not a zip of the folder itself, which both stores reject).
 set -euo pipefail
 cd "$(dirname "$0")"
 
